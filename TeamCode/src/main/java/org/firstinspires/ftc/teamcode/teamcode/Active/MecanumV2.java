@@ -6,33 +6,18 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.teamcode.Configuration;
 import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
 
 @TeleOp(name = "MecanumV2 (AndroidStudio)", group = "Prototype")
 public class MecanumV2 extends LinearOpMode {
-    final double scaleDrive = 1; // Scale drive stick axis.
-    final double scaleTurn = 1; // Scale turn stick axis.
-    final double scaleStrafe = 0.5; // Scale strafe stick axis.
+    Configuration.MecanumV2 cfg = new Configuration.MecanumV2();
 
-    final double maxDrive = 1;// Maximum motor speed while driving.
-    final double maxTurn = 1; // Maximum motor speed while turning.
-    final double maxStrafe = 0.5; // Maximum motor speed while strafing.
-
-    final double minLStickOverridePerc = 2; // How many times more the stick position has to be bigger than the other to override it
-
-    final double timeToMaxScale = 150; // Time in ms to reach full speed
-
-    final boolean runtimeDebug = true; // Show runtime
-    final boolean appliedDriveValuesDebug = false; // Show drive, turn, strafe
-    final boolean sliderMotorPowerDebug = true; // Show vsPower, and hsPower
-    final boolean controllerAxesDebug = false; // Show left and right stick X and Y
-    final boolean timeScalePerAxesDebug = false; // Show time scale for drive, turn, and strafe
-
-    private ElapsedTime runtime = new ElapsedTime(); //Time since startup
-    private double lastElapsed = runtime.milliseconds();
+    private final ElapsedTime runtime = new ElapsedTime(); //Time since startup
+    private final double lastElapsed = runtime.milliseconds();
 
     private double lastTimeDrive = lastElapsed;
-    private double lastTimeTurn = lastElapsed; // Currently unused, no smoothing on turning
+    // private double lastTimeTurn = lastElapsed; // Currently unused, no smoothing on turning
     private double lastTimeStrafe = lastElapsed;
 
     public double boolToNumber(boolean x) {
@@ -44,8 +29,8 @@ public class MecanumV2 extends LinearOpMode {
     public void runOpMode() {
         MecanumBase mbs = new MecanumBase(hardwareMap);
         // Find motor instances on initialization
-        DcMotor vsMotor =hardwareMap.get(DcMotor.class,"vsMotor");
-        DcMotor hsMotor =hardwareMap.get(DcMotor.class,"hsMotor");
+        DcMotor vsMotor = hardwareMap.get(DcMotor.class,"vsMotor");
+        DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
 
         waitForStart();
         runtime.reset();
@@ -55,7 +40,7 @@ public class MecanumV2 extends LinearOpMode {
             double timeScaleDrive;
             if (Math.abs(gamepad1.left_stick_y) == 0) lastTimeDrive = runtime.milliseconds();
 
-            timeScaleDrive = (runtime.milliseconds()-lastTimeDrive)/timeToMaxScale;
+            timeScaleDrive = (runtime.milliseconds()-lastTimeDrive)/cfg.timeToMaxScale;
             timeScaleDrive = Range.clip(timeScaleDrive,0,1);
 
             // Strafe time scaling
@@ -63,21 +48,21 @@ public class MecanumV2 extends LinearOpMode {
             if (Math.abs(gamepad1.left_stick_x) == 0) {
                 lastTimeStrafe = runtime.milliseconds();
             }
-            timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/timeToMaxScale;
+            timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/cfg.timeToMaxScale;
             timeScaleStrafe = Range.clip(timeScaleStrafe,0,1);
 
-            double drive = Range.clip(gamepad1.left_stick_y * scaleDrive, -maxDrive, maxDrive) * timeScaleDrive;
+            double drive = Range.clip(gamepad1.left_stick_y * cfg.scaleDrive, -cfg.maxDrive, cfg.maxDrive) * timeScaleDrive;
             double timeScaleTurn = 1;
-            double turn = Range.clip(gamepad1.right_stick_x * scaleTurn, -maxTurn, maxTurn) * timeScaleTurn;
-            double strafe = Range.clip(gamepad1.left_stick_x * scaleStrafe, -maxStrafe, maxStrafe) * timeScaleStrafe;
+            double turn = Range.clip(gamepad1.right_stick_x * cfg.scaleTurn, -cfg.maxTurn, cfg.maxTurn) * timeScaleTurn;
+            double strafe = Range.clip(gamepad1.left_stick_x * cfg.scaleStrafe, -cfg.maxStrafe, cfg.maxStrafe) * timeScaleStrafe;
 
             double percentageDriveStrafe = Math.abs(drive / strafe);
             double percentageStrafeDrive = Math.abs(strafe / drive);
 
-            if (percentageDriveStrafe > minLStickOverridePerc) {
+            if (percentageDriveStrafe > cfg.minLStickOverridePerc) {
                 strafe = 0;
                 telemetry.addData("Debug","Drive over Strafe active");
-            } else if (percentageStrafeDrive > minLStickOverridePerc) {
+            } else if (percentageStrafeDrive > cfg.minLStickOverridePerc) {
                 drive = 0;
                 telemetry.addData("Debug","Strafe over Drive active");
             }
@@ -90,31 +75,31 @@ public class MecanumV2 extends LinearOpMode {
             vsMotor.setPower(verticalSlidePower);
             hsMotor.setPower(horizontalSlidePower);
 
-            if (controllerAxesDebug) {
+            if (cfg.controllerAxesDebug) {
                 telemetry.addData("Left Stick", "X: " + gamepad1.left_stick_x);
                 telemetry.addData("Left Stick", "Y: " + gamepad1.left_stick_y);
                 telemetry.addData("Right Stick", "X: " + gamepad1.right_stick_x);
                 telemetry.addData("Right Stick", "Y: " + gamepad1.right_stick_y);
             }
 
-            if (appliedDriveValuesDebug) {
+            if (cfg.appliedDriveValuesDebug) {
                 telemetry.addData("drive", drive);
                 telemetry.addData("turn", turn);
                 telemetry.addData("strafe", strafe);
             }
 
-            if (timeScalePerAxesDebug) {
+            if (cfg.timeScalePerAxesDebug) {
                 telemetry.addData("drive", timeScaleDrive);
                 telemetry.addData("turn", timeScaleTurn);
                 telemetry.addData("strafe", timeScaleStrafe);
             }
 
-            if (sliderMotorPowerDebug) {
+            if (cfg.sliderMotorPowerDebug) {
                 telemetry.addData("vertical", verticalSlidePower);
                 telemetry.addData("horizontal", horizontalSlidePower);
             }
 
-            if (runtimeDebug) telemetry.addData("Status","Run Time: " + runtime.toString());
+            if (cfg.runtimeDebug) telemetry.addData("Status","Run Time: " + runtime);
             telemetry.update();
         }
     }
