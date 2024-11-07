@@ -54,8 +54,8 @@ public class MecanumV2 extends LinearOpMode {
 
         FL_Motor.setDirection(DcMotor.Direction.FORWARD);
         RL_Motor.setDirection(DcMotor.Direction.REVERSE);
-        FR_Motor.setDirection(DcMotor.Direction.REVERSE);
-        RR_Motor.setDirection(DcMotor.Direction.REVERSE);
+        FR_Motor.setDirection(DcMotor.Direction.FORWARD);
+        RR_Motor.setDirection(DcMotor.Direction.FORWARD);
 
         waitForStart();
         runtime.reset();
@@ -76,7 +76,7 @@ public class MecanumV2 extends LinearOpMode {
             timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/timeToMaxScale;
             timeScaleStrafe = Range.clip(timeScaleStrafe,0,1);
 
-            double drive = Range.clip(gamepad1.left_stick_y * scaleDrive, -maxDrive, maxDrive) * timeScaleDrive;
+            double drive = Range.clip(-gamepad1.left_stick_y * scaleDrive, -maxDrive, maxDrive) * timeScaleDrive;
             double timeScaleTurn = 1;
             double turn = Range.clip(gamepad1.right_stick_x * scaleTurn, -maxTurn, maxTurn) * timeScaleTurn;
             double strafe = Range.clip(gamepad1.left_stick_x * scaleStrafe, -maxStrafe, maxStrafe) * timeScaleStrafe;
@@ -92,10 +92,10 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("Debug","Strafe over Drive active");
             }
 
-            double FL_Power = (-drive + turn - strafe);
-            double RL_Power = (-drive + turn + strafe);
-            double FR_Power = (drive + turn + strafe);
-            double RR_Power = (drive + turn - strafe);
+            double FL_Power = (drive + turn - strafe);
+            double RL_Power = (drive + turn + strafe);
+            double FR_Power = (drive - turn - strafe);
+            double RR_Power = (drive - turn + strafe);
 
             double verticalSlidePower = (boolToNumber(gamepad1.left_bumper)-boolToNumber(gamepad1.right_bumper));
             double horizontalSlidePower = (gamepad1.left_trigger-gamepad1.right_trigger);
