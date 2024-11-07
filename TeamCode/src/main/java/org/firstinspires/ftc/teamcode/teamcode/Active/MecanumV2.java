@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
+
 @TeleOp(name = "MecanumV2 (AndroidStudio)", group = "Prototype")
 public class MecanumV2 extends LinearOpMode {
     final double scaleDrive = 1; // Scale drive stick axis.
@@ -22,7 +24,6 @@ public class MecanumV2 extends LinearOpMode {
 
     final boolean runtimeDebug = true; // Show runtime
     final boolean appliedDriveValuesDebug = false; // Show drive, turn, strafe
-    final boolean individualMotorPowerDebug = true; // Show power for FL, RL, FR, and RR motors
     final boolean sliderMotorPowerDebug = true; // Show vsPower, and hsPower
     final boolean controllerAxesDebug = false; // Show left and right stick X and Y
     final boolean timeScalePerAxesDebug = false; // Show time scale for drive, turn, and strafe
@@ -41,21 +42,10 @@ public class MecanumV2 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-
+        MecanumBase mbs = new MecanumBase(hardwareMap);
         // Find motor instances on initialization
-        // Define motor instance variables
-        DcMotor FL_Motor = hardwareMap.get(DcMotor.class, "FL_Motor");
-        DcMotor RL_Motor = hardwareMap.get(DcMotor.class, "RL_Motor");
-        DcMotor FR_Motor = hardwareMap.get(DcMotor.class, "FR_Motor");
-        DcMotor RR_Motor = hardwareMap.get(DcMotor.class, "RR_Motor");
-
         DcMotor vsMotor =hardwareMap.get(DcMotor.class,"vsMotor");
         DcMotor hsMotor =hardwareMap.get(DcMotor.class,"hsMotor");
-
-        FL_Motor.setDirection(DcMotor.Direction.FORWARD);
-        RL_Motor.setDirection(DcMotor.Direction.REVERSE);
-        FR_Motor.setDirection(DcMotor.Direction.REVERSE);
-        RR_Motor.setDirection(DcMotor.Direction.REVERSE);
 
         waitForStart();
         runtime.reset();
@@ -92,18 +82,10 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("Debug","Strafe over Drive active");
             }
 
-            double FL_Power = (drive - turn - strafe);
-            double RL_Power = (drive - turn + strafe);
-            double FR_Power = (drive + turn + strafe);
-            double RR_Power = (drive + turn - strafe);
+            mbs.setPower(drive,turn,strafe);
 
             double verticalSlidePower = (boolToNumber(gamepad1.left_bumper)-boolToNumber(gamepad1.right_bumper));
             double horizontalSlidePower = (gamepad1.left_trigger-gamepad1.right_trigger);
-
-            FL_Motor.setPower(FL_Power);
-            RL_Motor.setPower(RL_Power);
-            FR_Motor.setPower(FR_Power);
-            RR_Motor.setPower(RR_Power);
 
             vsMotor.setPower(verticalSlidePower);
             hsMotor.setPower(horizontalSlidePower);
@@ -125,13 +107,6 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("drive", timeScaleDrive);
                 telemetry.addData("turn", timeScaleTurn);
                 telemetry.addData("strafe", timeScaleStrafe);
-            }
-
-            if (individualMotorPowerDebug) {
-                telemetry.addData("FL_Motor", "Power: " + FL_Power);
-                telemetry.addData("RL_Motor", "Power: " + RL_Power);
-                telemetry.addData("FR_Motor", "Power: " + FR_Power);
-                telemetry.addData("RR_Motor", "Power: " + RR_Power);
             }
 
             if (sliderMotorPowerDebug) {
