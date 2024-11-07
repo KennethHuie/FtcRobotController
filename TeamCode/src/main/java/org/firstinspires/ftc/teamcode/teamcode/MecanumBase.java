@@ -18,14 +18,14 @@ public class MecanumBase {
 
         FL_Motor.setDirection(DcMotor.Direction.FORWARD);
         RL_Motor.setDirection(DcMotor.Direction.REVERSE);
-        FR_Motor.setDirection(DcMotor.Direction.REVERSE);
-        RR_Motor.setDirection(DcMotor.Direction.REVERSE);
+        FR_Motor.setDirection(DcMotor.Direction.FORWARD);
+        RR_Motor.setDirection(DcMotor.Direction.FORWARD);
     }
 
     public void setPower(double drive, double turn, double strafe) {
-        FL_Motor.setPower(drive - turn - strafe);
-        RL_Motor.setPower(drive - turn + strafe);
-        FR_Motor.setPower(drive + turn + strafe);
-        RR_Motor.setPower(drive + turn - strafe);
+        FL_Motor.setPower(-drive + turn - strafe);
+        RL_Motor.setPower(-drive + turn + strafe);
+        FR_Motor.setPower(-drive - turn - strafe);
+        RR_Motor.setPower(-drive - turn + strafe);
     }
 }
