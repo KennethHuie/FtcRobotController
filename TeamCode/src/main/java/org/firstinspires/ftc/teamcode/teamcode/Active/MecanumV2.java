@@ -38,11 +38,12 @@ public class MecanumV2 extends LinearOpMode {
         DcMotor RL_Motor = hardwareMap.get(DcMotor.class, "RL_Motor");
         DcMotor FR_Motor = hardwareMap.get(DcMotor.class, "FR_Motor");
         DcMotor RR_Motor = hardwareMap.get(DcMotor.class, "RR_Motor");
+        DcMotor vsMotor = hardwareMap.get(DcMotor.class,"vsMotor");
         
         FL_Motor.setDirection(DcMotor.Direction.FORWARD);
         RL_Motor.setDirection(DcMotor.Direction.REVERSE);
-        FR_Motor.setDirection(DcMotor.Direction.REVERSE);
-        RR_Motor.setDirection(DcMotor.Direction.REVERSE);
+        FR_Motor.setDirection(DcMotor.Direction.FORWARD);
+        RR_Motor.setDirection(DcMotor.Direction.FORWARD);
         
         waitForStart();
         runtime.reset();
@@ -64,7 +65,7 @@ public class MecanumV2 extends LinearOpMode {
             timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/timeToMaxScale;
             timeScaleStrafe = Range.clip(timeScaleStrafe,0,1);
 
-            double drive = Range.clip(gamepad1.left_stick_y * scaleDrive, -maxDrive, maxDrive) * timeScaleDrive;
+            double drive = Range.clip(-gamepad1.left_stick_y * scaleDrive, -maxDrive, maxDrive) * timeScaleDrive;
             double timeScaleTurn = 1;
             double turn = Range.clip(gamepad1.right_stick_x * scaleTurn, -maxTurn, maxTurn) * timeScaleTurn;
             double strafe = Range.clip(gamepad1.left_stick_x * scaleStrafe, -maxStrafe, maxStrafe) * timeScaleStrafe;
@@ -80,16 +81,19 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("Debug","Strafe over Drive active");
             }
             
-            double FL_Power = (drive - turn - strafe);
-            double RL_Power = (drive - turn + strafe);
-            double FR_Power = (drive + turn + strafe);
-            double RR_Power = (drive + turn - strafe);
+            double FL_Power = (drive + turn - strafe);
+            double RL_Power = (drive + turn + strafe);
+            double FR_Power = (drive - turn - strafe);
+            double RR_Power = (drive - turn + strafe);
+
+            double verticalSlidePower = (-gamepad1.left_trigger+gamepad1.right_trigger);
             
             FL_Motor.setPower(FL_Power);
             RL_Motor.setPower(RL_Power);
             FR_Motor.setPower(FR_Power);
             RR_Motor.setPower(RR_Power);
-            
+
+            vsMotor.setPower(verticalSlidePower);
             
             telemetry.addData("Left Stick","X: "+gamepad1.left_stick_x);
             telemetry.addData("Left Stick","Y: "+gamepad1.left_stick_y);
