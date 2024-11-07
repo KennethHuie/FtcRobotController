@@ -92,8 +92,8 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("Debug","Strafe over Drive active");
             }
 
-            double FL_Power = (drive - turn - strafe);
-            double RL_Power = (drive - turn + strafe);
+            double FL_Power = (-drive + turn - strafe);
+            double RL_Power = (-drive + turn + strafe);
             double FR_Power = (drive + turn + strafe);
             double RR_Power = (drive + turn - strafe);
 
