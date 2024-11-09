@@ -5,12 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "servoContinuous",group = "Testing")
+@TeleOp(name = "servoContinuous",group = "Utilities")
 public class ServoContinuous extends LinearOpMode {
-    private CRServo servo = null;
     @Override
     public void runOpMode() {
-        servo = hardwareMap.get(CRServo.class, "servo");
+        CRServo servo = hardwareMap.get(CRServo.class, "servo");
         waitForStart();
         while (opModeIsActive()){
             servo.setPower(1);

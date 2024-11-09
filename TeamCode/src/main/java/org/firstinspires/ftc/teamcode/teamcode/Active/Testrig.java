@@ -2,16 +2,15 @@ package org.firstinspires.ftc.teamcode.teamcode.Active;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.teamcode.Configuration;
 import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
 
-@TeleOp(name = "MecanumV2 (AndroidStudio)", group = "Prototype")
-public class MecanumV2 extends LinearOpMode {
-    Configuration.MecanumV2 cfg = new Configuration.MecanumV2();
+@TeleOp(name = "Testrig (AndroidStudio)", group = "Prototype")
+public class Testrig extends LinearOpMode {
+    Configuration.Testrig cfg = new Configuration.Testrig();
 
     private final ElapsedTime runtime = new ElapsedTime(); //Time since startup
     private final double lastElapsed = runtime.milliseconds();
@@ -20,17 +19,9 @@ public class MecanumV2 extends LinearOpMode {
     // private double lastTimeTurn = lastElapsed; // Currently unused, no smoothing on turning
     private double lastTimeStrafe = lastElapsed;
 
-    public double boolToNumber(boolean x) {
-        if (x) return 1;
-        else return 0;
-    }
-
     @Override
     public void runOpMode() {
         MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
-        // Find motor instances on initialization
-        DcMotor vsMotor = hardwareMap.get(DcMotor.class,"vsMotor");
-        DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
 
         waitForStart();
         runtime.reset();
@@ -69,12 +60,6 @@ public class MecanumV2 extends LinearOpMode {
 
             mbs.setPower(drive,turn,strafe);
 
-            double verticalSlidePower = (boolToNumber(gamepad1.left_bumper)-boolToNumber(gamepad1.right_bumper));
-            double horizontalSlidePower = (gamepad1.left_trigger-gamepad1.right_trigger);
-
-            vsMotor.setPower(verticalSlidePower);
-            hsMotor.setPower(horizontalSlidePower);
-
             if (cfg.controllerAxesDebug) {
                 telemetry.addData("Left Stick", "X: " + gamepad1.left_stick_x);
                 telemetry.addData("Left Stick", "Y: " + gamepad1.left_stick_y);
@@ -89,14 +74,9 @@ public class MecanumV2 extends LinearOpMode {
             }
 
             if (cfg.timeScalePerAxesDebug) {
-                telemetry.addData("drive scale", timeScaleDrive);
-                telemetry.addData("turn scale", timeScaleTurn);
-                telemetry.addData("strafe scale", timeScaleStrafe);
-            }
-
-            if (cfg.sliderMotorPowerDebug) {
-                telemetry.addData("vertical", verticalSlidePower);
-                telemetry.addData("horizontal", horizontalSlidePower);
+                telemetry.addData("drive", timeScaleDrive);
+                telemetry.addData("turn", timeScaleTurn);
+                telemetry.addData("strafe", timeScaleStrafe);
             }
 
             if (cfg.runtimeDebug) telemetry.addData("Status","Run Time: " + runtime);
