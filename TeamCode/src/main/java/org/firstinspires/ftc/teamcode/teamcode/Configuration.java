@@ -37,12 +37,14 @@ public class Configuration {
     public static class Testrig extends Configuration {
         public Testrig() {
             super();
-            super.FR_Direction = Direction.REVERSE;
+            super.RL_Direction = Direction.REVERSE;
             super.RR_Direction = Direction.REVERSE;
             super.motorPowerDebug = true; // Show individual motor power debug
             super.motorDirectionDebug = true; // Show individual motor directions
         }
 
+        public double scaleStrafe = 1; // Scale strafe stick axis.
+        public double maxStrafe = 1;
         public boolean runtimeDebug = true; // Show runtime
         public boolean appliedDriveValuesDebug = true; // Show drive, turn, strafe
         public boolean controllerAxesDebug = true; // Show left and right stick X and Y
