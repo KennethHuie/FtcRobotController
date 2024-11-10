@@ -47,7 +47,5 @@ public class Configuration {
         public double maxStrafe = 1;
         public boolean runtimeDebug = true; // Show runtime
         public boolean appliedDriveValuesDebug = true; // Show drive, turn, strafe
-        public boolean controllerAxesDebug = true; // Show left and right stick X and Y
-        public boolean timeScalePerAxesDebug = true; // Show time scale for drive, turn, and strafe
     }
 }
