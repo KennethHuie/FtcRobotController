@@ -29,9 +29,17 @@ public class Configuration {
     public static class MecanumV2 extends Configuration{
         public MecanumV2() {
             super();
-            super.RL_Direction = Direction.REVERSE;
+            super.FL_Direction = Direction.REVERSE;
+            super.RL_Direction = Direction.FORWARD;
+            super.RR_Direction = Direction.REVERSE;
         }
         public boolean sliderMotorPowerDebug = true;
+        public boolean runtimeDebug = true; // Show runtime
+        public boolean motorPowerDebug = true; // Show individual motor power debug
+        public boolean motorDirectionDebug = true; // Show individual motor directions
+        public boolean appliedDriveValuesDebug = true; // Show drive, turn, strafe
+        public boolean controllerAxesDebug = true; // Show left and right stick X and Y
+        public boolean timeScalePerAxesDebug = true; // Show time scale for drive, turn, and strafe
     }
 
     public static class Testrig extends Configuration {
