@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.teamcode.Active;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -29,8 +30,16 @@ public class MecanumV2 extends LinearOpMode {
     public void runOpMode() {
         MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
         // Find motor instances on initialization
-        DcMotor vsMotor = hardwareMap.get(DcMotor.class,"vsMotor");
-        DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
+        DcMotor vsLeftMotor = hardwareMap.get(DcMotor.class,"vsLeftMotor");
+        DcMotor vsRightMotor = hardwareMap.get(DcMotor.class,"vsRightMotor");
+        vsRightMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        //Servo
+        boolean state = false;
+        boolean debounce = false;
+        Servo bucketServo = hardwareMap.get(Servo.class, "bucket");
+
+        //DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
 
         waitForStart();
         runtime.reset();
@@ -72,8 +81,20 @@ public class MecanumV2 extends LinearOpMode {
             double verticalSlidePower = (boolToNumber(gamepad1.left_bumper)-boolToNumber(gamepad1.right_bumper));
             double horizontalSlidePower = (gamepad1.left_trigger-gamepad1.right_trigger);
 
-            vsMotor.setPower(verticalSlidePower);
-            hsMotor.setPower(horizontalSlidePower);
+            if (!gamepad1.a) {
+                debounce = false;
+            }
+            if (gamepad1.a) {
+                if (!debounce) state = !state;
+                debounce = true;
+            }
+
+            telemetry.addData("Servo",boolToNumber(state));
+
+            //hsMotor.setPower(horizontalSlidePower);
+            vsLeftMotor.setPower(verticalSlidePower);
+            vsRightMotor.setPower(verticalSlidePower);
+            bucketServo.setPosition(boolToNumber(state));
 
             if (cfg.controllerAxesDebug) {
                 telemetry.addData("Left Stick", "X: " + gamepad1.left_stick_x);
