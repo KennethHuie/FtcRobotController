@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -40,16 +41,15 @@ public class MecanumV2 extends LinearOpMode {
         DcMotor vsRightMotor = hardwareMap.get(DcMotor.class,"vsRightMotor");
         DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
 
+        // Define servos
+        ToggleServo bucketServo = new ToggleServo(hardwareMap.get(Servo.class, "bucket"));
+        ToggleServo wristServo = new ToggleServo(hardwareMap.get(Servo.class, "bucketWrist"));
+        CRServo sweeper = hardwareMap.get(CRServo.class,"sweeper");
+
         // Set direction of motors
         vsRightMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        //Servo
-        boolean state = false;
-        boolean debounce = false;
-        Servo _bucketServo = hardwareMap.get(Servo.class, "bucket");
-        ToggleServo bucketServo = new ToggleServo(_bucketServo) {
-        };
         bucketServo.setDirection(Servo.Direction.REVERSE);
+        bucketServo.setState(true);
 
         waitForStart();
         runtime.reset();
@@ -104,9 +104,16 @@ public class MecanumV2 extends LinearOpMode {
                 if (!bucketServo.getDebounce()) bucketServo.setState(!bucketServo.getState());
                 bucketServo.setDebounce(true);
             }
-            if (!gamepad1.a) { // Reset when let go
-                bucketServo.setDebounce(false);
+            if (!gamepad1.a) {bucketServo.setDebounce(false);} // Reset when let go
+
+            if (gamepad1.x) { // Change once and disable repeat
+                if (!wristServo.getDebounce()) wristServo.setState(!wristServo.getState());
+                wristServo.setDebounce(true);
             }
+            if (!gamepad1.x) {wristServo.setDebounce(false);} // Reset when let go
+
+            sweeper.setPower(boolToNumber(gamepad1.dpad_up));
+            sweeper.setPower(-boolToNumber(gamepad1.dpad_down));
 
             // Set motor power
             //hsMotor.setPower(horizontalSlidePower);
@@ -115,6 +122,7 @@ public class MecanumV2 extends LinearOpMode {
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
             bucketServo.setPosition(boolToNumber(bucketServo.getState()));
+            wristServo.setPosition(boolToNumber(wristServo.getState()));
 
             //Debug 1/15/2025
             telemetry.addData("Servo",boolToNumber(bucketServo.getState()));
