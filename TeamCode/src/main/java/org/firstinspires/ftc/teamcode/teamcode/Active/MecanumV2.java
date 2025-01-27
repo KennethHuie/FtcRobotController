@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.teamcode.Active;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -12,6 +13,8 @@ import org.firstinspires.ftc.teamcode.teamcode.Configuration;
 import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
 import org.firstinspires.ftc.teamcode.teamcode.ToggleServo;
 
+// Flag FTC-Dashboard
+@Config
 // Set name of OpMode
 @TeleOp(name = "MecanumV2 (AndroidStudio)", group = "Prototype")
 public class MecanumV2 extends LinearOpMode {
@@ -20,6 +23,8 @@ public class MecanumV2 extends LinearOpMode {
     private final ElapsedTime runtime = new ElapsedTime(); //Time since startup
     private final double lastElapsed = runtime.milliseconds();
 
+    private static final double bucketWristRange = 0.5;
+    private static final double grabberRange = 0.2;
     // Create time variables and set them to current time
     private double lastTimeDrive = lastElapsed;
     // private double lastTimeTurn = lastElapsed; // Currently unused, no smoothing on turning
@@ -44,6 +49,7 @@ public class MecanumV2 extends LinearOpMode {
         // Define servos
         ToggleServo bucketServo = new ToggleServo(hardwareMap.get(Servo.class, "bucket"));
         ToggleServo wristServo = new ToggleServo(hardwareMap.get(Servo.class, "bucketWrist"));
+        ToggleServo grabberServo = new ToggleServo(hardwareMap.get(Servo.class, "grabber"));
         CRServo sweeper = hardwareMap.get(CRServo.class,"sweeper");
 
         // Set direction of motors
@@ -100,32 +106,44 @@ public class MecanumV2 extends LinearOpMode {
             //Determines the power for the Intake slider motor
             double horizontalSlidePower = -(gamepad1.left_trigger-gamepad1.right_trigger);
 
-            if (gamepad1.a) { // Change once and disable repeat
+            if (gamepad1.a) { // Toggle Bucket flip state
                 if (!bucketServo.getDebounce()) bucketServo.setState(!bucketServo.getState());
                 bucketServo.setDebounce(true);
             }
             if (!gamepad1.a) {bucketServo.setDebounce(false);} // Reset when let go
 
-            if (gamepad1.x) { // Change once and disable repeat
+            if (gamepad1.x) { // Toggle Intake flip state
                 if (!wristServo.getDebounce()) wristServo.setState(!wristServo.getState());
                 wristServo.setDebounce(true);
             }
             if (!gamepad1.x) {wristServo.setDebounce(false);} // Reset when let go
 
-            sweeper.setPower(boolToNumber(gamepad1.dpad_up));
-            sweeper.setPower(-boolToNumber(gamepad1.dpad_down));
+            if (gamepad1.b) { // Toggle Grabber state
+                if (!grabberServo.getDebounce()) grabberServo.setState(!grabberServo.getState());
+                grabberServo.setDebounce(true);
+            }
+            if (!gamepad1.b) {grabberServo.setDebounce(false);} // Reset when let go
+
+            // Sweeper logic
+            if (gamepad1.dpad_up) {
+                sweeper.setPower(1);
+            } else if (gamepad1.dpad_down) {
+                sweeper.setPower(-1);
+            } else {
+                sweeper.setPower(0);
+            }
 
             // Set motor power
-            //hsMotor.setPower(horizontalSlidePower);
-            vsLeftMotor.setPower(verticalSlidePower);
+            vsLeftMotor.setPower(verticalSlidePower); // Synchronize Left & Right slide
             vsRightMotor.setPower(verticalSlidePower);
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
             bucketServo.setPosition(boolToNumber(bucketServo.getState()));
-            wristServo.setPosition(boolToNumber(wristServo.getState()));
+            wristServo.setPosition(boolToNumber(wristServo.getState())*bucketWristRange);
+            grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
 
-            //Debug 1/15/2025
-            telemetry.addData("Servo",boolToNumber(bucketServo.getState()));
+            //1/25/2025 Debug sweeper
+            telemetry.addData("Sweeper", sweeper.getPower());
 
             // Fast Flags
             if (cfg.controllerAxesDebug) {
