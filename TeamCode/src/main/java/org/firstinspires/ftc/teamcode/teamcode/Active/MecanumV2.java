@@ -39,6 +39,8 @@ public class MecanumV2 extends LinearOpMode {
     @Override
     public void runOpMode() {
         //Create a new base drivetrain
+        boolean reverse = false; // Reverse drive mode
+        boolean _reverse = false;// Debounce
         MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
 
         // Find motor instances on initialization
@@ -97,6 +99,20 @@ public class MecanumV2 extends LinearOpMode {
                 drive = 0;
                 telemetry.addData("Debug","Strafe over Drive active");
             }
+            if (gamepad1.y) {
+                if (!_reverse) {
+                    _reverse = true;
+                    reverse = !reverse;
+                }
+            }
+            if (!gamepad1.y) {
+                _reverse = false;
+            }
+
+            if (reverse) {
+                drive=-drive;
+                strafe=-strafe;
+            }
 
             //Send control values to the basic Mecanum Drivetrain
             mbs.setPower(drive,turn,strafe);
@@ -142,6 +158,9 @@ public class MecanumV2 extends LinearOpMode {
             wristServo.setPosition(boolToNumber(wristServo.getState())*bucketWristRange);
             grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
 
+            //Reverse Mode:
+            if (!reverse) telemetry.addData("FORWARD","MODE");
+            if (reverse) telemetry.addData("REVERSE","MODE");
             //1/25/2025 Debug sweeper
             telemetry.addData("Sweeper", sweeper.getPower());
 
