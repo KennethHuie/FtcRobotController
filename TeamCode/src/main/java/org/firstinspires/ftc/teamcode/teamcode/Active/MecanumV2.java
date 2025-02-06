@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.teamcode.Active;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -38,7 +39,9 @@ public class MecanumV2 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        //Create a new base drivetrain
+        // Play hello moto
+        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("moto", "raw", hardwareMap.appContext.getPackageName()));
+        //Create a new base drivetrain3
         boolean reverse = false; // Reverse drive mode
         boolean _reverse = false;// Debounce
         MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
@@ -125,18 +128,29 @@ public class MecanumV2 extends LinearOpMode {
             if (gamepad1.a) { // Toggle Bucket flip state
                 if (!bucketServo.getDebounce()) bucketServo.setState(!bucketServo.getState());
                 bucketServo.setDebounce(true);
+                bucketServo.setPosition(boolToNumber(bucketServo.getState()));
             }
             if (!gamepad1.a) {bucketServo.setDebounce(false);} // Reset when let go
 
             if (gamepad1.x) { // Toggle Intake flip state
                 if (!wristServo.getDebounce()) wristServo.setState(!wristServo.getState());
                 wristServo.setDebounce(true);
+
+                if (wristServo.getState() && bucketServo.getState()) {
+                    bucketServo.setPosition(0.65);
+                }
+                if (!wristServo.getState() && bucketServo.getState()) {
+                    bucketServo.setPosition(1);
+                }
+
+                wristServo.setPosition(boolToNumber(wristServo.getState())*bucketWristRange);
             }
             if (!gamepad1.x) {wristServo.setDebounce(false);} // Reset when let go
 
             if (gamepad1.b) { // Toggle Grabber state
                 if (!grabberServo.getDebounce()) grabberServo.setState(!grabberServo.getState());
                 grabberServo.setDebounce(true);
+                grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
             }
             if (!gamepad1.b) {grabberServo.setDebounce(false);} // Reset when let go
 
@@ -154,15 +168,13 @@ public class MecanumV2 extends LinearOpMode {
             vsRightMotor.setPower(verticalSlidePower);
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
-            bucketServo.setPosition(boolToNumber(bucketServo.getState()));
-            wristServo.setPosition(boolToNumber(wristServo.getState())*bucketWristRange);
-            grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
+            telemetry.addData("Bucket",bucketServo.getPosition());
+            telemetry.addData("A",bucketServo.getState());
+            telemetry.addData("B",wristServo.getState());
 
             //Reverse Mode:
             if (!reverse) telemetry.addData("FORWARD","MODE");
             if (reverse) telemetry.addData("REVERSE","MODE");
-            //1/25/2025 Debug sweeper
-            telemetry.addData("Sweeper", sweeper.getPower());
 
             // Fast Flags
             if (cfg.controllerAxesDebug) {
@@ -185,7 +197,10 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("vertical", verticalSlidePower);
                 telemetry.addData("horizontal", horizontalSlidePower);
             }
-
+            if (cfg.sliderEncoderDebug) {
+                telemetry.addData("LeftSlide",vsLeftMotor.getCurrentPosition());
+                telemetry.addData("RightSlide",vsRightMotor.getCurrentPosition());
+            }
             if (cfg.runtimeDebug) telemetry.addData("Status","Run Time: " + runtime);
             telemetry.update();
         }

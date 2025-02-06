@@ -100,6 +100,7 @@ import com.qualcomm.robotcore.wifi.NetworkConnectionFactory;
 import com.qualcomm.robotcore.wifi.NetworkType;
 
 import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor;
+import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor2;
 import org.firstinspires.ftc.ftccommon.internal.AnnotatedHooksClassFilter;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
 import org.firstinspires.ftc.ftccommon.internal.ProgramAndManageActivity;
@@ -413,7 +414,7 @@ public class FtcRobotControllerActivity extends Activity
 
   protected UpdateUI.Callback createUICallback(UpdateUI updateUI) {
     UpdateUI.Callback result = updateUI.new Callback();
-    result.setStateMonitor(new SoundPlayingRobotMonitor());
+    result.setStateMonitor(new SoundPlayingRobotMonitor2());
     return result;
   }
 

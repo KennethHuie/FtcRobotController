@@ -33,7 +33,8 @@ public class Configuration {
             super.RL_Direction = Direction.FORWARD;
             super.RR_Direction = Direction.REVERSE;
         }
-        public boolean sliderMotorPowerDebug = true;
+        public boolean sliderMotorPowerDebug = false;
+        public boolean sliderEncoderDebug = false;
     }
 
     public static class Testrig extends Configuration {
@@ -49,5 +50,20 @@ public class Configuration {
         public double maxStrafe = 1;
         public boolean runtimeDebug = true; // Show runtime
         public boolean appliedDriveValuesDebug = true; // Show drive, turn, strafe
+    }
+
+    public static class Simon extends Configuration {
+        public Simon() {
+            super();
+            super.RL_Direction = Direction.REVERSE;
+            super.RR_Direction = Direction.REVERSE;
+            super.motorPowerDebug = false; // Show individual motor power debug
+            super.motorDirectionDebug = false; // Show individual motor directions
+        }
+
+        public double scaleStrafe = 1; // Scale strafe stick axis.
+        public double maxStrafe = 1;
+        public boolean runtimeDebug = false; // Show runtime
+        public boolean appliedDriveValuesDebug = false; // Show drive, turn, strafe
     }
 }
