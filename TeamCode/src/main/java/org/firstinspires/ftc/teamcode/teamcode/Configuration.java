@@ -33,6 +33,8 @@ public class Configuration {
             super.RL_Direction = Direction.FORWARD;
             super.RR_Direction = Direction.REVERSE;
         }
+        public double maxStrafe = 1;
+        public double scaleStrafe = 1;
         public boolean sliderMotorPowerDebug = false;
         public boolean sliderEncoderDebug = false;
     }

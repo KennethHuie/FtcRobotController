@@ -41,6 +41,10 @@ public class MecanumV2 extends LinearOpMode {
     public void runOpMode() {
         // Play hello moto
         SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("moto", "raw", hardwareMap.appContext.getPackageName()));
+        int forwardModeID = hardwareMap.appContext.getResources().getIdentifier("forwardmode", "raw", hardwareMap.appContext.getPackageName());
+        int reverseModeID = hardwareMap.appContext.getResources().getIdentifier("reversemode", "raw", hardwareMap.appContext.getPackageName());
+        int grabberOpenID = hardwareMap.appContext.getResources().getIdentifier("grabberopen", "raw", hardwareMap.appContext.getPackageName());
+        int grabberClosedID = hardwareMap.appContext.getResources().getIdentifier("grabberclosed", "raw", hardwareMap.appContext.getPackageName());
         //Create a new base drivetrain3
         boolean reverse = false; // Reverse drive mode
         boolean _reverse = false;// Debounce
@@ -106,15 +110,22 @@ public class MecanumV2 extends LinearOpMode {
                 if (!_reverse) {
                     _reverse = true;
                     reverse = !reverse;
+                    SoundPlayer.getInstance().stopPlayingAll();
+                    if (reverse) {
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,reverseModeID);
+                    } else {
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,forwardModeID);
+                    }
                 }
             }
+
             if (!gamepad1.y) {
                 _reverse = false;
             }
 
             if (reverse) {
-                drive=-drive;
-                strafe=-strafe;
+                drive = -drive;
+                strafe = -strafe;
             }
 
             //Send control values to the basic Mecanum Drivetrain
@@ -148,7 +159,16 @@ public class MecanumV2 extends LinearOpMode {
             if (!gamepad1.x) {wristServo.setDebounce(false);} // Reset when let go
 
             if (gamepad1.b) { // Toggle Grabber state
-                if (!grabberServo.getDebounce()) grabberServo.setState(!grabberServo.getState());
+                if (!grabberServo.getDebounce()) {
+                    grabberServo.setState(!grabberServo.getState());
+                    SoundPlayer.getInstance().stopPlayingAll();
+                    if (grabberServo.getState()) {
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,grabberOpenID);
+                    } else {
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,grabberClosedID);
+
+                    }
+                }
                 grabberServo.setDebounce(true);
                 grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
             }
@@ -168,9 +188,7 @@ public class MecanumV2 extends LinearOpMode {
             vsRightMotor.setPower(verticalSlidePower);
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
-            telemetry.addData("Bucket",bucketServo.getPosition());
-            telemetry.addData("A",bucketServo.getState());
-            telemetry.addData("B",wristServo.getState());
+            telemetry.addData("Strafe",cfg.scaleStrafe);
 
             //Reverse Mode:
             if (!reverse) telemetry.addData("FORWARD","MODE");
