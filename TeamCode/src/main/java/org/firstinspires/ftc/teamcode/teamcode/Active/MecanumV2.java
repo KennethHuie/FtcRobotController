@@ -197,6 +197,7 @@ public class MecanumV2 extends LinearOpMode {
             // Set motor power
             vsLeftMotor.setPower(verticalSlidePower); // Synchronize Left & Right slide
             vsRightMotor.setPower(verticalSlidePower);
+            // Some kind of attempt to equalize the slide positions - Kenneth, 4/24/2025
             if (verticalSlidePower == 0) {
                 double test = (double)(vsLeftMotor.getCurrentPosition()-vsRightMotor.getCurrentPosition())/150;
                 vsRightMotor.setPower(test);
