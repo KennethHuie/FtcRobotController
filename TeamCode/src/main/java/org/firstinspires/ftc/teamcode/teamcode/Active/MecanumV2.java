@@ -32,7 +32,9 @@ public class MecanumV2 extends LinearOpMode {
     private double lastTimeStrafe = lastElapsed;
 
     final int maxHeight = -10000;
+    final int maxLength = 5500;
     private boolean heightLimit = false;
+    private boolean lengthLimit = false;
 
     // Convert a boolean to a 1 or 0, (1=true,0=false)
     public double boolToNumber(boolean x) {
@@ -143,7 +145,13 @@ public class MecanumV2 extends LinearOpMode {
             double verticalSlidePower = (boolToNumber((gamepad1.left_bumper))-boolToNumber(gamepad1.right_bumper&&!heightLimit));
 
             //Determines the power for the Intake slider motor
-            double horizontalSlidePower = -(gamepad1.left_trigger-gamepad1.right_trigger);
+            lengthLimit = hsMotor.getCurrentPosition() >= maxLength;
+            double horizontalSlidePower=0;
+            if (!lengthLimit) {
+                horizontalSlidePower = -(gamepad1.left_trigger - gamepad1.right_trigger);
+            } else {
+                horizontalSlidePower = -gamepad1.left_trigger;
+            }
 
             if (gamepad1.a) { // Toggle Bucket flip state
                 if (!bucketServo.getDebounce()) bucketServo.setState(!bucketServo.getState());
@@ -208,6 +216,7 @@ public class MecanumV2 extends LinearOpMode {
             telemetry.addData("Strafe",cfg.scaleStrafe);
             telemetry.addData("leftElevatorEncoder",vsLeftMotor.getCurrentPosition());
             telemetry.addData("rightElevatorEncoder",vsRightMotor.getCurrentPosition());
+            telemetry.addData("intake or something",hsMotor.getCurrentPosition());
 
             //Reverse Mode:
             if (!reverse) telemetry.addData("FORWARD","MODE");
