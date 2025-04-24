@@ -31,6 +31,9 @@ public class MecanumV2 extends LinearOpMode {
     // private double lastTimeTurn = lastElapsed; // Currently unused, no smoothing on turning
     private double lastTimeStrafe = lastElapsed;
 
+    final int maxHeight = -10000;
+    private boolean heightLimit = false;
+
     // Convert a boolean to a 1 or 0, (1=true,0=false)
     public double boolToNumber(boolean x) {
         if (x) return 1;
@@ -57,7 +60,8 @@ public class MecanumV2 extends LinearOpMode {
 
         // Define servos
         ToggleServo bucketServo = new ToggleServo(hardwareMap.get(Servo.class, "bucket"));
-        ToggleServo wristServo = new ToggleServo(hardwareMap.get(Servo.class, "bucketWrist"));
+        ToggleServo wristServoRight = new ToggleServo(hardwareMap.get(Servo.class, "bucketWristRight"));
+        ToggleServo wristServoLeft = new ToggleServo(hardwareMap.get(Servo.class, "bucketWristLeft"));
         ToggleServo grabberServo = new ToggleServo(hardwareMap.get(Servo.class, "grabber"));
         CRServo sweeper = hardwareMap.get(CRServo.class,"sweeper");
 
@@ -65,6 +69,9 @@ public class MecanumV2 extends LinearOpMode {
         vsRightMotor.setDirection(DcMotor.Direction.REVERSE);
         bucketServo.setDirection(Servo.Direction.REVERSE);
         bucketServo.setState(true);
+
+        //Grab on init
+        grabberServo.setPosition(0);
 
         waitForStart();
         runtime.reset();
@@ -132,7 +139,9 @@ public class MecanumV2 extends LinearOpMode {
             mbs.setPower(drive,turn,strafe);
 
             //Determines the power for the vertical lift slide motors
-            double verticalSlidePower = (boolToNumber(gamepad1.left_bumper)-boolToNumber(gamepad1.right_bumper));
+            heightLimit = vsLeftMotor.getCurrentPosition() <= maxHeight;
+            double verticalSlidePower = (boolToNumber((gamepad1.left_bumper))-boolToNumber(gamepad1.right_bumper&&!heightLimit));
+
             //Determines the power for the Intake slider motor
             double horizontalSlidePower = -(gamepad1.left_trigger-gamepad1.right_trigger);
 
@@ -140,23 +149,25 @@ public class MecanumV2 extends LinearOpMode {
                 if (!bucketServo.getDebounce()) bucketServo.setState(!bucketServo.getState());
                 bucketServo.setDebounce(true);
                 bucketServo.setPosition(boolToNumber(bucketServo.getState()));
+                bucketServo.setPosition(boolToNumber(bucketServo.getState()));
             }
             if (!gamepad1.a) {bucketServo.setDebounce(false);} // Reset when let go
 
             if (gamepad1.x) { // Toggle Intake flip state
-                if (!wristServo.getDebounce()) wristServo.setState(!wristServo.getState());
-                wristServo.setDebounce(true);
+                if (!wristServoRight.getDebounce()) wristServoRight.setState(!wristServoRight.getState());
+                wristServoRight.setDebounce(true);
 
-                if (wristServo.getState() && bucketServo.getState()) {
-                    bucketServo.setPosition(0.65);
+                if (wristServoRight.getState() && bucketServo.getState()) {
+                    bucketServo.setPosition(0.725);
                 }
-                if (!wristServo.getState() && bucketServo.getState()) {
+                if (!wristServoRight.getState() && bucketServo.getState()) {
                     bucketServo.setPosition(1);
                 }
 
-                wristServo.setPosition(boolToNumber(wristServo.getState())*bucketWristRange);
+                wristServoRight.setPosition(boolToNumber(wristServoRight.getState())*bucketWristRange);
+                wristServoLeft.setPosition(1-boolToNumber(wristServoRight.getState())*bucketWristRange);
             }
-            if (!gamepad1.x) {wristServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.x) {wristServoRight.setDebounce(false);} // Reset when let go
 
             if (gamepad1.b) { // Toggle Grabber state
                 if (!grabberServo.getDebounce()) {
@@ -186,9 +197,16 @@ public class MecanumV2 extends LinearOpMode {
             // Set motor power
             vsLeftMotor.setPower(verticalSlidePower); // Synchronize Left & Right slide
             vsRightMotor.setPower(verticalSlidePower);
+            if (verticalSlidePower == 0) {
+                double test = (double)(vsLeftMotor.getCurrentPosition()-vsRightMotor.getCurrentPosition())/150;
+                vsRightMotor.setPower(test);
+                vsLeftMotor.setPower(-test);
+            }
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
             telemetry.addData("Strafe",cfg.scaleStrafe);
+            telemetry.addData("leftElevatorEncoder",vsLeftMotor.getCurrentPosition());
+            telemetry.addData("rightElevatorEncoder",vsRightMotor.getCurrentPosition());
 
             //Reverse Mode:
             if (!reverse) telemetry.addData("FORWARD","MODE");

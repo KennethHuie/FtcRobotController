@@ -16,7 +16,8 @@
             <!-- Servo -->
             <Servo name="bucket" port="0"/>
             <Servo name="grabber" port="1"/>
-            <Servo name="bucketWrist" port="4"/>
+            <Servo name="bucketWristLeft" port="3"/>
+            <Servo name="bucketWristRight" port="4"/>
             <ContinuousRotationServo name="sweeper" port="5"/>
         </LynxModule>
     </LynxUsbDevice>
