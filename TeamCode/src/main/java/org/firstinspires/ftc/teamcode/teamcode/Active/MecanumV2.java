@@ -35,6 +35,17 @@ public class MecanumV2 extends LinearOpMode {
     final int maxLength = 5500;
     private boolean heightLimit = false;
     private boolean lengthLimit = false;
+    boolean dbl = false;
+    boolean dbr = false;
+
+    int step = 0;
+    final int[] test = {
+            0, // i0 - Initial height
+            -250, // i1 - Wall Height
+            -2000, // i2 - Low Bucket
+            -5150, // i4 - Specimen Bar
+            -7150 // i5 - High Bucket
+    };
 
     // Convert a boolean to a 1 or 0, (1=true,0=false)
     public double boolToNumber(boolean x) {
@@ -74,6 +85,12 @@ public class MecanumV2 extends LinearOpMode {
 
         //Grab on init
         grabberServo.setPosition(0);
+
+        // Vertical slider zeroing
+        vsRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vsRightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        vsLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        vsLeftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
         runtime.reset();
@@ -140,10 +157,50 @@ public class MecanumV2 extends LinearOpMode {
             //Send control values to the basic Mecanum Drivetrain
             mbs.setPower(drive,turn,strafe);
 
+            /* todo:
+             - Create fixed height points that the sides automatically change between
+             - Make variables 'not public'
+             - Make the code more pleasing and add comments
+             */
             //Determines the power for the vertical lift slide motors
             heightLimit = vsLeftMotor.getCurrentPosition() <= maxHeight;
-            double verticalSlidePower = (boolToNumber((gamepad1.left_bumper))-boolToNumber(gamepad1.right_bumper&&!heightLimit));
+            //double verticalSlidePower = (boolToNumber((gamepad1.left_bumper))-boolToNumber(gamepad1.right_bumper&&!heightLimit));
+            double a = boolToNumber(vsLeftMotor.getCurrentPosition() < (test[step]-150)); // Lower
+            double b = boolToNumber(vsLeftMotor.getCurrentPosition() > (test[step]+150)); // Higher
+            double verticalSlidePower = (a-b);
+            if (gamepad1.right_bumper) {
+                if (!dbr) {
+                    if (step < test.length-1) {
+                        step += 1;
+                    }
+                }
+                dbr = true;
+            } else {
+                dbr = false;
+            }
+            if (gamepad1.left_bumper) {
+                if (!dbl) {
+                    if (step > 0) {
+                        step -= 1;
+                    }
+                }
+                dbl = true;
+            } else {
+                dbl = false;
+            }
+            int value = test[step];
 
+            /*
+            val = false
+            if gamepad {
+                if !db {
+                    val = true
+                }
+                db = true
+            } else {
+                db = false
+            }
+            */
             //Determines the power for the Intake slider motor
             lengthLimit = hsMotor.getCurrentPosition() >= maxLength;
             double horizontalSlidePower=0;
@@ -207,16 +264,16 @@ public class MecanumV2 extends LinearOpMode {
             vsRightMotor.setPower(verticalSlidePower);
             // Some kind of attempt to equalize the slide positions - Kenneth, 4/24/2025
             if (verticalSlidePower == 0) {
-                double test = (double)(vsLeftMotor.getCurrentPosition()-vsRightMotor.getCurrentPosition())/150;
-                vsRightMotor.setPower(test);
-                vsLeftMotor.setPower(-test);
+                double balancing = (double)(vsLeftMotor.getCurrentPosition()-vsRightMotor.getCurrentPosition())/150;
+                vsRightMotor.setPower(balancing);
+                vsLeftMotor.setPower(-balancing);
             }
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
-            telemetry.addData("Strafe",cfg.scaleStrafe);
-            telemetry.addData("leftElevatorEncoder",vsLeftMotor.getCurrentPosition());
-            telemetry.addData("rightElevatorEncoder",vsRightMotor.getCurrentPosition());
-            telemetry.addData("intake or something",hsMotor.getCurrentPosition());
+            telemetry.addData("A",a);
+            telemetry.addData("B",b);
+            telemetry.addData("S",step);
+            telemetry.addData("V:",a-b);
 
             //Reverse Mode:
             if (!reverse) telemetry.addData("FORWARD","MODE");
