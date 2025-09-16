@@ -56,7 +56,8 @@ public class MecanumV2 extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Play hello moto
-        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("moto", "raw", hardwareMap.appContext.getPackageName()));
+        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("bomb", "raw", hardwareMap.appContext.getPackageName()));
+        //SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("moto", "raw", hardwareMap.appContext.getPackageName()));
         int forwardModeID = hardwareMap.appContext.getResources().getIdentifier("forwardmode", "raw", hardwareMap.appContext.getPackageName());
         int reverseModeID = hardwareMap.appContext.getResources().getIdentifier("reversemode", "raw", hardwareMap.appContext.getPackageName());
         int grabberOpenID = hardwareMap.appContext.getResources().getIdentifier("grabberopen", "raw", hardwareMap.appContext.getPackageName());
