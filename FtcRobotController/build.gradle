@@ -1,4 +1,3 @@
-//file:noinspection GrDeprecatedAPIUsage
 import java.text.SimpleDateFormat
 
 //
@@ -13,19 +12,19 @@ android {
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 28
         buildConfigField "String", "APP_BUILD_TIME", '"' + (new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ", Locale.ROOT).format(new Date())) + '"'
-        android.buildFeatures.buildConfig = true
     }
 
-    compileSdkVersion 34
+    buildFeatures {
+        buildConfig = true
+    }
+
+    compileSdkVersion 30
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     namespace = 'com.qualcomm.ftcrobotcontroller'
-    buildFeatures {
-        buildConfig true
-    }
 }
 
 apply from: '../build.dependencies.gradle'
