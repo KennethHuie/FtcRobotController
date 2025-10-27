@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode.teamcode.Active;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -23,12 +24,12 @@ public class Decode2026 extends LinearOpMode {
     @Override
     public void runOpMode() {
         //Create a new base drivetrain3
-        boolean reverse = false; // Reverse drive mode
-        boolean _reverse = false;// Debounce
-        MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
+        MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
 
-        DcMotor intake = hardwareMap.get(DcMotor.class,"intake");
-        DcMotor flywheel = hardwareMap.get(DcMotor.class, "flywheel");
+        DcMotor intake = hardwareMap.get(DcMotor.class, "intake");
+        DcMotor flywheel1 = hardwareMap.get(DcMotor.class, "flywheel1");
+        DcMotor flywheel2 = hardwareMap.get(DcMotor.class, "flywheel2");
+        flywheel2.setDirection(DcMotor.Direction.REVERSE);
 
         waitForStart();
         runtime.reset();
@@ -37,8 +38,8 @@ public class Decode2026 extends LinearOpMode {
             double timeScaleDrive;
             if (Math.abs(gamepad1.left_stick_y) == 0) lastTimeDrive = runtime.milliseconds();
 
-            timeScaleDrive = (runtime.milliseconds()-lastTimeDrive)/cfg.timeToMaxScale;
-            timeScaleDrive = Range.clip(timeScaleDrive,0,1);
+            timeScaleDrive = (runtime.milliseconds() - lastTimeDrive) / cfg.timeToMaxScale;
+            timeScaleDrive = Range.clip(timeScaleDrive, 0, 1);
 
             //Turn time scaling
             double timeScaleTurn = 1;
@@ -50,8 +51,8 @@ public class Decode2026 extends LinearOpMode {
             }
 
             //Turn runtime (ms) into percentage of goal time
-            timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/cfg.timeToMaxScale;
-            timeScaleStrafe = Range.clip(timeScaleStrafe,0,1);
+            timeScaleStrafe = (runtime.milliseconds() - lastTimeStrafe) / cfg.timeToMaxScale;
+            timeScaleStrafe = Range.clip(timeScaleStrafe, 0, 1);
 
             //Movement variables, all clamped
             double drive = Range.clip(-gamepad1.left_stick_y * cfg.scaleDrive, -cfg.maxDrive, cfg.maxDrive) * timeScaleDrive;
@@ -59,13 +60,15 @@ public class Decode2026 extends LinearOpMode {
             double strafe = Range.clip(gamepad1.left_stick_x * cfg.scaleStrafe, -cfg.maxStrafe, cfg.maxStrafe) * timeScaleStrafe;
 
             intake.setPower(gamepad1.a ? 1 : 0);
-            flywheel.setPower(gamepad1.b ? 1 : 0);
+            flywheel1.setPower(gamepad1.b ? 1 : 0);
+            flywheel2.setPower(gamepad1.b ? 1 : 0);
 
             //Send control values to the basic Mecanum Drivetrain
-            mbs.setPower(drive,turn,-strafe);
+            mbs.setPower(drive, turn, -strafe);
 
-            telemetry.addData("intake",intake.getPower());
-            telemetry.addData("flywheel",flywheel.getPower());
+            telemetry.addData("intake", intake.getPower());
+            telemetry.addData("flywheel1", flywheel1.getPower());
+            telemetry.addData("flywheel2", flywheel2.getPower());
             telemetry.update();
         }
     }
