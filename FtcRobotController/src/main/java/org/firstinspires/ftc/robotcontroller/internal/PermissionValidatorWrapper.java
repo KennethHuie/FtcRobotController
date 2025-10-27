@@ -43,7 +43,7 @@ public class PermissionValidatorWrapper extends PermissionValidatorActivity {
     /*
      * The list of dangerous permissions the robot controller needs.
      */
-    protected List<String> robotControllerPermissions = new ArrayList<>() {{
+    protected List<String> robotControllerPermissions = new ArrayList<String>() {{
         add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         add(Manifest.permission.READ_EXTERNAL_STORAGE);
         add(Manifest.permission.CAMERA);
