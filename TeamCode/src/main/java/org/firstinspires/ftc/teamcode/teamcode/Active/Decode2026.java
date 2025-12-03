@@ -25,16 +25,24 @@ public class Decode2026 extends LinearOpMode {
     @Override
     public void runOpMode() {
         //Create a new base drivetrain3
-        boolean reverse = false; // Reverse drive mode
+        boolean reverse = true; // Reverse drive mode
         boolean _reverse = false;// Debounce
         MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
+
+        int sweeperSpeed = 0;
+        boolean _sweeper = false;
 
         int forwardModeID = hardwareMap.appContext.getResources().getIdentifier("forwardmode", "raw", hardwareMap.appContext.getPackageName());
         int reverseModeID = hardwareMap.appContext.getResources().getIdentifier("reversemode", "raw", hardwareMap.appContext.getPackageName());
 
-        DcMotor intake = hardwareMap.get(DcMotor.class, "intake");
         DcMotor flywheel1 = hardwareMap.get(DcMotor.class, "flywheel1");
         DcMotor flywheel2 = hardwareMap.get(DcMotor.class, "flywheel2");
+        DcMotor sweeper = hardwareMap.get(DcMotor.class, "sweeper");
+        DcMotor feed = hardwareMap.get(DcMotor.class, "feed");
+
+        int lastFly1 = 0;
+        int lastFly2 = 0;
+
         flywheel2.setDirection(DcMotor.Direction.REVERSE);
 
         waitForStart();
@@ -65,18 +73,27 @@ public class Decode2026 extends LinearOpMode {
             double turn = Range.clip(gamepad1.right_stick_x * cfg.scaleTurn, -cfg.maxTurn, cfg.maxTurn) * timeScaleTurn;
             double strafe = Range.clip(gamepad1.left_stick_x * cfg.scaleStrafe, -cfg.maxStrafe, cfg.maxStrafe) * timeScaleStrafe;
 
-            intake.setPower(gamepad1.x ? -1 : gamepad1.a ? 1 : 0);
-            flywheel1.setPower(gamepad1.b ? 1 : 0);
-            flywheel2.setPower(gamepad1.b ? 1 : 0);
-
+            // Reverse driving mode logic
             if (!gamepad1.y) _reverse = false;
-
-
             if (reverse) {
                 drive = -drive;
                 strafe = -strafe;
             }
 
+            // Sweeper control logic
+            if (!_sweeper) {
+                if (gamepad1.dpad_up && sweeperSpeed < 1) {
+                    _sweeper = true;
+                    sweeperSpeed += 1;
+                }
+                if (gamepad1.dpad_down && sweeperSpeed > -1) {
+                    _sweeper = true;
+                    sweeperSpeed -= 1;
+                }
+            }
+            if (!(gamepad1.dpad_up || gamepad1.dpad_down)) {
+                _sweeper = false;
+            }
             //Send control values to the basic Mecanum Drivetrain
             mbs.setPower(drive, turn, -strafe);
 
@@ -93,9 +110,27 @@ public class Decode2026 extends LinearOpMode {
                 }
             }
 
-            telemetry.addData("intake", intake.getPower());
+            sweeper.setPower(sweeperSpeed);
+            double rt = gamepad1.right_trigger;
+            feed.setPower(-rt);
+            flywheel1.setPower(rt + (gamepad1.right_bumper ? 1 : 0)); // Force spooling to manage less buttons simultaneously
+            flywheel2.setPower(rt + (gamepad1.right_bumper ? 1 : 0));
+
+            int delta1 = flywheel1.getCurrentPosition() - lastFly1;
+            int delta2 = flywheel2.getCurrentPosition() - lastFly2;
+            int diff = delta1 - delta2;
+            lastFly1 = flywheel1.getCurrentPosition();
+            lastFly2 = flywheel2.getCurrentPosition();
+
+            telemetry.addLine();
             telemetry.addData("flywheel1", flywheel1.getPower());
             telemetry.addData("flywheel2", flywheel2.getPower());
+            telemetry.addData("sweeper", sweeperSpeed);
+            telemetry.addData("feed", feed.getPower());
+            telemetry.addLine();
+            telemetry.addData("delta1", delta1);
+            telemetry.addData("delta2", delta2);
+            telemetry.addData("diff", diff);
             telemetry.update();
         }
     }
