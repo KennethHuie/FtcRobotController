@@ -13,7 +13,6 @@ public class MotorSpinTest extends LinearOpMode{
         waitForStart();
         while (opModeIsActive()) {
             // control the motor with gamepad
-
             double power = gamepad1.left_stick_y;
             motor.setPower(power * 0.5);
         }
