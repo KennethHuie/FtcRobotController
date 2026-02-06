@@ -174,8 +174,8 @@ public class Decode2026 extends LinearOpMode {
                     readyPlayed = true;
                     gamepad1.rumble(500);
                 }
-                flywheel1.setPower(0.35);
-                flywheel2.setPower(0.35);
+                flywheel1.setPower(gamepad1.a ? 0.35 : 0);
+                flywheel2.setPower(gamepad1.a ? 0.35 : 0);
             } else {
                 double power = ((flywheelSpeed - (Math.abs((double) delta1) + Math.abs((double) delta2)) / 2) / 10) + 0.3;
                 flywheel1.setPower(gamepad1.a ? power : 0);
@@ -222,13 +222,13 @@ public class Decode2026 extends LinearOpMode {
             telemetry.addData("delta1", delta1);
             telemetry.addData("delta2", delta2);
             telemetry.addLine();
-            telemetry.addData("LD", leftDistanceSensor.getDistance(DistanceUnit.CM));
-            telemetry.addData("RD", rightDistanceSensor.getDistance(DistanceUnit.CM));
+//            telemetry.addData("LD", leftDistanceSensor.getDistance(DistanceUnit.CM));
+//            telemetry.addData("RD", rightDistanceSensor.getDistance(DistanceUnit.CM));
             NormalizedRGBA rcs = roofColorSensor.getNormalizedColors();
-            String something = String.format(Locale.ENGLISH,"%f,%f,%f",rcs.red,rcs.green,rcs.blue);
-            telemetry.addData("RC",something);
+            String something = String.format(Locale.ENGLISH, "%f,%f,%f", rcs.red, rcs.green, rcs.blue);
+            telemetry.addData("RC", something);
             telemetry.addData("Rangefinder", turretRangefinder.getDistance(DistanceUnit.CM));
-            telemetry.addData("BC", rearColorSensor.getNormalizedColors().toColor());
+//            telemetry.addData("BC", rearColorSensor.getNormalizedColors().toColor());
             telemetry.update();
         }
     }
