@@ -4,6 +4,7 @@ import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
@@ -21,7 +22,7 @@ import java.util.List;
 public class TurretTrackingTest extends LinearOpMode {
     private AprilTagProcessor aprilTag;
     private VisionPortal visionPortal;
-
+    private DcMotor turret = null;
     private void initAprilTag() {
         WebcamName camera = hardwareMap.get(WebcamName.class, "turretCam");
         // Create the AprilTag processor.
@@ -114,18 +115,28 @@ public class TurretTrackingTest extends LinearOpMode {
     public void runOpMode() {
 
         initAprilTag();
-
-
         // Wait for the DS start button to be touched.
         telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch START to start OpMode");
         telemetry.update();
         waitForStart();
-
+        turret = hardwareMap.get(DcMotor.class, "turret");
+        AprilTagDetection focus = null;
+        int bearing = 0;
         if (opModeIsActive()) {
             while (opModeIsActive()) {
 
                 telemetryAprilTag();
+                if (!aprilTag.getDetections().isEmpty()) {
+                    focus = aprilTag.getDetections().get(0);
+                    bearing = (int) focus.ftcPose.bearing;
+                    telemetry.addData("siwhdow", bearing);
+                    turret.setTargetPosition(0);
+                    turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    turret.setTargetPosition(11 * bearing + turret.getCurrentPosition());
+
+                }
+
 
                 // Push telemetry to the Driver Station.
                 telemetry.update();
@@ -136,8 +147,7 @@ public class TurretTrackingTest extends LinearOpMode {
                 } else if (gamepad1.dpad_up) {
                     visionPortal.resumeStreaming();
                 }
-
-                // Share the CPU.
+                aprilTag.getDetections();                // Share the CPU.
                 sleep(20);
             }
         }
