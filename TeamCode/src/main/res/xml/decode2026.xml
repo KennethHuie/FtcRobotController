@@ -76,7 +76,5 @@
                 port="0" />
         </LynxModule>
     </LynxUsbDevice>
-    <Webcam
-        name="turretCam"
-        serialNumber="29782370" />
+    <EthernetDevice name="turretCam" serialNumber="EthernetOverUsb:eth0:172.29.0.22" port="0" ipAddress="172.29.0.1"/>
 </Robot>
