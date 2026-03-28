@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import com.bylazar.gamepad.GamepadManager;
 import com.bylazar.gamepad.PanelsGamepad;
 import com.qualcomm.ftccommon.SoundPlayer;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -52,6 +53,7 @@ public class Decode2026 extends LinearOpMode {
     // right & left bumpers = sweeper control
     // a/cross = spool flywheels
     // x/square = toggle kickstand
+    // b/circle = auto-aim turret
     @Override
     public void runOpMode() {
         //Create a new base drivetrain3
@@ -59,13 +61,14 @@ public class Decode2026 extends LinearOpMode {
         boolean _reverse = false;// Debounce
         MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
 
-        int flywheelSpeed = 25;
+        double flywheelSpeed = 30;
 
         boolean readyPlayed = false; // Used to rumble controller when flywheel speed target hit
 
         @SuppressLint("DiscouragedApi") final int forwardModeID = hardwareMap.appContext.getResources().getIdentifier("forwardmode", "raw", hardwareMap.appContext.getPackageName());
         @SuppressLint("DiscouragedApi") final int reverseModeID = hardwareMap.appContext.getResources().getIdentifier("reversemode", "raw", hardwareMap.appContext.getPackageName());
 
+        Limelight3A camera = hardwareMap.get(Limelight3A.class, "turretCam");
         //Motors
         DcMotor flywheel1 = hardwareMap.get(DcMotor.class, "flywheel1");
         DcMotor flywheel2 = hardwareMap.get(DcMotor.class, "flywheel2");
@@ -100,6 +103,8 @@ public class Decode2026 extends LinearOpMode {
         flywheel2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //turret.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        camera.start();
 
         waitForStart();
         runtime.reset();
@@ -155,9 +160,30 @@ public class Decode2026 extends LinearOpMode {
 
             // Feed/Sweep up system
             sweeper.setPower(Gamepad1.right_bumper ? 1 : Gamepad1.left_bumper ? -1 : 0);
+            intakeBlocker.setPosition(Gamepad1.left_bumper ? -1 : Gamepad1.a ? 1 : -1);
+
+            //Hood
+            if (gamepad1.dpadLeftWasReleased()) {
+                flywheelSpeed-=2.5;
+            }
+            if (gamepad1.dpadRightWasReleased())  {
+                flywheelSpeed+=2.5;
+            }
+
             //Turret
-            double leftPower = circleCurve(Gamepad1.left_trigger);
-            double rightPower = circleCurve(Gamepad1.right_trigger);
+            double leftPower = 0;
+            double rightPower = 0;
+
+            //Autocontrol
+            if (Gamepad1.a) {
+                double azimuth = camera.getLatestResult().getTx();
+                rightPower = azimuth > 0 ? Math.abs(azimuth)/20 : 0;
+                leftPower = azimuth < 0 ? Math.abs(azimuth)/20 : 0;
+            }
+            leftPower = Gamepad1.left_trigger>0 ? circleCurve(Gamepad1.left_trigger) : leftPower;
+            rightPower = Gamepad1.right_trigger>0 ? circleCurve(Gamepad1.right_trigger) : rightPower;
+
+            //Manual
             if (turret.getCurrentPosition() > 1000) {
                 rightPower = 0;
             }
@@ -165,8 +191,6 @@ public class Decode2026 extends LinearOpMode {
                 leftPower = 0;
             }
             turret.setPower(rightPower - leftPower);
-
-            intakeBlocker.setPosition(Gamepad1.a ? 1 : -1);
 
             // Flywheel
             int delta1 = flywheel1.getCurrentPosition() - lastFly1;
@@ -180,12 +204,12 @@ public class Decode2026 extends LinearOpMode {
                     readyPlayed = true;
                     Gamepad1.rumble(500);
                 }
-                flywheel1.setPower(Gamepad1.a ? 0.35 : 0);
-                flywheel2.setPower(Gamepad1.a ? 0.35 : 0);
+                flywheel1.setPower(Gamepad1.a ? 0.35 : 0.25);
+                flywheel2.setPower(Gamepad1.a ? 0.35 : 0.25);
             } else {
                 double power = ((flywheelSpeed - (Math.abs((double) delta1) + Math.abs((double) delta2)) / 2) / 10) + 0.3;
-                flywheel1.setPower(Gamepad1.a ? power : 0);
-                flywheel2.setPower(Gamepad1.a ? power : 0);
+                flywheel1.setPower(Gamepad1.a ? power : 0.25);
+                flywheel2.setPower(Gamepad1.a ? power : 0.25);
                 readyPlayed = false;
             }
 
@@ -219,6 +243,7 @@ public class Decode2026 extends LinearOpMode {
 
             telemetry.addLine();
             telemetry.addData("turret", turret.getCurrentPosition());
+            telemetry.addData("target azimuth",camera.getLatestResult().getTy());
             telemetry.addData("hood", hoodLeft.getPosition());
             telemetry.addLine();
             telemetry.addData("target", flywheelSpeed);
