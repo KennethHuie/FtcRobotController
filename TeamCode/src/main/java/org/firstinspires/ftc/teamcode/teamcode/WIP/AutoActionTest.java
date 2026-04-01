@@ -7,13 +7,11 @@ import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.bylazar.telemetry.PanelsTelemetry;
-import com.qualcomm.hardware.bosch.BHI260IMU;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
@@ -25,13 +23,15 @@ class Sweeper {
     public Sweeper(HardwareMap hardwareMap) {
         sweeper = hardwareMap.get(DcMotor.class, "sweeper");
     }
-    class Sweep implements Action {
+
+    class Intake implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            sweeper.setPower(1);
+            sweeper.setPower(0.5);
             return false;
         }
     }
+
     class Stop implements Action {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
@@ -39,15 +39,53 @@ class Sweeper {
             return false;
         }
     }
-    public Action sweep() {
-        return new Sweep();
+
+    public Action intake() {
+        return new Intake();
     }
+
     public Action stop() {
-        return new Sweep();
+        return new Stop();
     }
 }
 
-@Autonomous(name = "AutoActionTest",group = "Utilities")
+class Turret {
+    int tolerance = 15;
+    DcMotor turret;
+
+    public Turret(HardwareMap hardwareMap) {
+        turret = hardwareMap.get(DcMotor.class, "turret");
+        turret.setTargetPosition(turret.getCurrentPosition()); // Keep current encoder position
+        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    class TurnToAngle implements Action {
+        double angle;
+
+        public TurnToAngle(double a) {
+            angle = a;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
+            int rounded = (int) Math.round((50d / 3) * angle);
+            turret.setTargetPosition(rounded);
+            int current = turret.getCurrentPosition();
+            telemetryPacket.put("target", current);
+            return ((rounded - 15) < current) && (rounded < (rounded + 15));
+        }
+    }
+
+    public Action turnTo(double a) {
+        return new TurnToAngle(a);
+    }
+
+    public void setTolerance(int x) {
+        tolerance = x;
+    }
+}
+
+@Autonomous(name = "AutoActionTest", group = "Utilities")
 public class AutoActionTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -61,7 +99,7 @@ public class AutoActionTest extends LinearOpMode {
         //Motors
         DcMotor flywheel1 = hardwareMap.get(DcMotor.class, "flywheel1");
         DcMotor flywheel2 = hardwareMap.get(DcMotor.class, "flywheel2");
-        DcMotor turret = hardwareMap.get(DcMotor.class, "turret");
+        Turret turret = new Turret(hardwareMap);
         //Servo
         ToggleServo standLeft = new ToggleServo(hardwareMap.get(Servo.class, "servoL"));
         ToggleServo standRight = new ToggleServo(hardwareMap.get(Servo.class, "servoR"));
@@ -75,9 +113,11 @@ public class AutoActionTest extends LinearOpMode {
         Actions.runBlocking(
                 drive.actionBuilder(initialPose)
                         //Decode Fast Preset
-                        .stopAndAdd(sweeper.sweep())
+                        .stopAndAdd(sweeper.intake())
                         .waitSeconds(1)
                         .stopAndAdd(sweeper.stop())
+                        .waitSeconds(1)
+                        .stopAndAdd(turret.turnTo(45))
                         .build());
 
     }
