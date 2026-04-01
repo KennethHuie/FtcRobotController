@@ -35,6 +35,11 @@
             <Servo
                 name="intakeBlocker"
                 port="4" />
+            <ControlHubImuBHI260AP
+                name="imu"
+                bus="0"
+                port="0"
+                />
             <REV_VL53L0X_RANGE_SENSOR
                 name="distanceL"
                 bus="1"
@@ -65,7 +70,6 @@
                 name="turret"
                 port="3" />
             <!-- Servo -->
-            <!--Servo name="bucket" port="0"/-->
             <RevColorSensorV3
                 name="rear"
                 bus="0"
