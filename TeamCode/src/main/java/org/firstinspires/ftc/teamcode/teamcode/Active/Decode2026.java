@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 
 import com.bylazar.gamepad.GamepadManager;
 import com.bylazar.gamepad.PanelsGamepad;
+import com.bylazar.telemetry.PanelsTelemetry;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -17,12 +18,11 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.teamcode.Configuration;
 import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
 import org.firstinspires.ftc.teamcode.teamcode.ToggleServo;
-
-import java.util.Locale;
 
 @TeleOp(name = "Decode2026 (AndroidStudio)", group = "Active")
 public class Decode2026 extends LinearOpMode {
@@ -83,15 +83,18 @@ public class Decode2026 extends LinearOpMode {
         // Sensors
         // -- Main Hub
         Rev2mDistanceSensor leftDistanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceL");
-        Rev2mDistanceSensor rightDistanceSensor = hardwareMap.get(Rev2mDistanceSensor.class, "distanceR");
         NormalizedColorSensor roofColorSensor = hardwareMap.get(RevColorSensorV3.class, "roof");
         // -- Expansion Hub
         NormalizedColorSensor rearColorSensor = hardwareMap.get(RevColorSensorV3.class, "rear");
-        Rev2mDistanceSensor turretRangefinder = hardwareMap.get(Rev2mDistanceSensor.class, "rangefinder");
 
         boolean stepFlywheelspeed = false;
         int lastFly1 = 0;
         int lastFly2 = 0;
+
+        double lastPoll = runtime.milliseconds();
+        double leftDistance = leftDistanceSensor.getDistance(DistanceUnit.CM);
+        NormalizedRGBA roofColor = roofColorSensor.getNormalizedColors();
+        NormalizedRGBA rearColor = rearColorSensor.getNormalizedColors();
 
         turret.setDirection(DcMotor.Direction.REVERSE);
         flywheel2.setDirection(DcMotor.Direction.REVERSE);
@@ -164,10 +167,10 @@ public class Decode2026 extends LinearOpMode {
 
             //Hood
             if (gamepad1.dpadLeftWasReleased()) {
-                flywheelSpeed-=2.5;
+                flywheelSpeed -= 2.5;
             }
-            if (gamepad1.dpadRightWasReleased())  {
-                flywheelSpeed+=2.5;
+            if (gamepad1.dpadRightWasReleased()) {
+                flywheelSpeed += 2.5;
             }
 
             //Turret
@@ -177,11 +180,11 @@ public class Decode2026 extends LinearOpMode {
             //Autocontrol
             if (Gamepad1.a) {
                 double azimuth = camera.getLatestResult().getTx();
-                rightPower = azimuth > 0 ? Math.abs(azimuth)/20 : 0;
-                leftPower = azimuth < 0 ? Math.abs(azimuth)/20 : 0;
+                rightPower = azimuth > 0 ? Math.abs(azimuth) / 20 : 0;
+                leftPower = azimuth < 0 ? Math.abs(azimuth) / 20 : 0;
             }
-            leftPower = Gamepad1.left_trigger>0 ? circleCurve(Gamepad1.left_trigger) : leftPower;
-            rightPower = Gamepad1.right_trigger>0 ? circleCurve(Gamepad1.right_trigger) : rightPower;
+            leftPower = Gamepad1.left_trigger > 0 ? circleCurve(Gamepad1.left_trigger) : leftPower;
+            rightPower = Gamepad1.right_trigger > 0 ? circleCurve(Gamepad1.right_trigger) : rightPower;
 
             //Manual
             if (turret.getCurrentPosition() > 1000) {
@@ -199,7 +202,7 @@ public class Decode2026 extends LinearOpMode {
             lastFly2 = flywheel2.getCurrentPosition();
 
             // Rumble when target speed achieved
-            if (Math.abs(delta1) > flywheelSpeed && Math.abs(delta2) > flywheelSpeed) { // Play sound when flywheels are ready
+            if (Math.abs(delta1) > flywheelSpeed && Math.abs(delta2) > flywheelSpeed) {
                 if (!readyPlayed) {
                     readyPlayed = true;
                     Gamepad1.rumble(500);
@@ -211,6 +214,13 @@ public class Decode2026 extends LinearOpMode {
                 flywheel1.setPower(Gamepad1.a ? power : 0.25);
                 flywheel2.setPower(Gamepad1.a ? power : 0.25);
                 readyPlayed = false;
+            }
+
+            if (lastPoll < runtime.milliseconds() && Gamepad1.a) {
+                lastPoll = runtime.milliseconds() + 50;
+                leftDistance = leftDistanceSensor.getDistance(DistanceUnit.CM);
+                roofColor = roofColorSensor.getNormalizedColors();
+                rearColor = rearColorSensor.getNormalizedColors();
             }
 
             // Toggle kickstand servos
@@ -234,16 +244,9 @@ public class Decode2026 extends LinearOpMode {
                 hoodRight.setPosition(-1);
             }
 
-            if (Gamepad1.dpadRightWasPressed()) {
-                flywheelSpeed += 1;
-            }
-            if (Gamepad1.dpadLeftWasPressed()) {
-                flywheelSpeed -= 1;
-            }
-
             telemetry.addLine();
             telemetry.addData("turret", turret.getCurrentPosition());
-            telemetry.addData("target azimuth",camera.getLatestResult().getTy());
+            telemetry.addData("target azimuth", camera.getLatestResult().getTy());
             telemetry.addData("hood", hoodLeft.getPosition());
             telemetry.addLine();
             telemetry.addData("target", flywheelSpeed);
@@ -253,14 +256,10 @@ public class Decode2026 extends LinearOpMode {
             telemetry.addData("delta1", delta1);
             telemetry.addData("delta2", delta2);
             telemetry.addLine();
-//            telemetry.addData("LD", leftDistanceSensor.getDistance(DistanceUnit.CM));
-//            telemetry.addData("RD", rightDistanceSensor.getDistance(DistanceUnit.CM));
-//            NormalizedRGBA rcs = roofColorSensor.getNormalizedColors();
-//            String something = String.format(Locale.ENGLISH, "%f,%f,%f", rcs.red, rcs.green, rcs.blue);
-//            telemetry.addData("RC", something);
-//            telemetry.addData("Rangefinder", turretRangefinder.getDistance(DistanceUnit.CM));
-//            telemetry.addData("BC", rearColorSensor.getNormalizedColors().toColor());
-            telemetry.update();
+            telemetry.addData("leftDistance", leftDistance);
+            telemetry.addData("roofColor", roofColor);
+            telemetry.addData("rearColor", rearColor);
+            PanelsTelemetry.INSTANCE.getTelemetry().update(telemetry);
         }
     }
 }

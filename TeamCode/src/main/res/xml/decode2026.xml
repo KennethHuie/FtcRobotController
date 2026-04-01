@@ -38,19 +38,14 @@
             <ControlHubImuBHI260AP
                 name="imu"
                 bus="0"
-                port="0"
-                />
+                port="0" />
             <REV_VL53L0X_RANGE_SENSOR
                 name="distanceL"
                 bus="1"
                 port="0" />
-            <REV_VL53L0X_RANGE_SENSOR
-                name="distanceR"
-                bus="2"
-                port="0" />
             <RevColorSensorV3
                 name="roof"
-                bus="3"
+                bus="2"
                 port="0" />
         </LynxModule>
         <LynxModule
@@ -69,16 +64,15 @@
             <TetrixMotor
                 name="turret"
                 port="3" />
-            <!-- Servo -->
             <RevColorSensorV3
                 name="rear"
                 bus="0"
                 port="0" />
-            <REV_VL53L0X_RANGE_SENSOR
-                name="rangefinder"
-                bus="1"
-                port="0" />
         </LynxModule>
     </LynxUsbDevice>
-    <EthernetDevice name="turretCam" serialNumber="EthernetOverUsb:eth0:172.29.0.22" port="0" ipAddress="172.29.0.1"/>
+    <EthernetDevice
+        name="turretCam"
+        serialNumber="EthernetOverUsb:eth0:172.29.0.22"
+        port="0"
+        ipAddress="172.29.0.1" />
 </Robot>

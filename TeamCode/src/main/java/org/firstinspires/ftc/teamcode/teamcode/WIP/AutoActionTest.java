@@ -60,19 +60,19 @@ class Turret {
     }
 
     class TurnToAngle implements Action {
-        double angle;
+        int angle;
 
         public TurnToAngle(double a) {
-            angle = a;
+            angle = (int) Math.round((50d / 3) * a);
         }
 
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            int rounded = (int) Math.round((50d / 3) * angle);
-            turret.setTargetPosition(rounded);
+            telemetryPacket.put("target", angle);
+            turret.setTargetPosition(angle);
             int current = turret.getCurrentPosition();
-            telemetryPacket.put("target", current);
-            return ((rounded - 15) < current) && (rounded < (rounded + 15));
+            telemetryPacket.put("current", current);
+            return ((angle - 15) < current) && (angle < (angle + 15));
         }
     }
 
@@ -108,7 +108,7 @@ public class AutoActionTest extends LinearOpMode {
         Servo intakeBlocker = hardwareMap.get(Servo.class, "intakeBlocker");
         Sweeper sweeper = new Sweeper(hardwareMap);
 
-        telemetry.update();
+        panelsTelemetry.getTelemetry().update(telemetry);
         waitForStart();
         Actions.runBlocking(
                 drive.actionBuilder(initialPose)
