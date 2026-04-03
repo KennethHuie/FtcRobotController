@@ -6,9 +6,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.teamcode.Configuration;
-import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
-import org.firstinspires.ftc.teamcode.teamcode.ToggleServo;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Configuration;
+import org.firstinspires.ftc.teamcode.teamcode.Components.MecanumBase;
+import org.firstinspires.ftc.teamcode.teamcode.Components.ToggleServo;
 
 @TeleOp(name = "Simon (AndroidStudio)", group = "Prototype")
 public class Simon extends LinearOpMode {
@@ -29,7 +29,7 @@ public class Simon extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
+        MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
 
         ToggleServo armServo = new ToggleServo(hardwareMap.get(Servo.class, "arm"));
         armServo.setDirection(Servo.Direction.REVERSE);
@@ -42,16 +42,16 @@ public class Simon extends LinearOpMode {
             double timeScaleDrive;
             if (Math.abs(gamepad1.left_stick_y) == 0) lastTimeDrive = runtime.milliseconds();
 
-            timeScaleDrive = (runtime.milliseconds()-lastTimeDrive)/cfg.timeToMaxScale;
-            timeScaleDrive = Range.clip(timeScaleDrive,0,1);
+            timeScaleDrive = (runtime.milliseconds() - lastTimeDrive) / cfg.timeToMaxScale;
+            timeScaleDrive = Range.clip(timeScaleDrive, 0, 1);
 
             // Strafe time scaling
             double timeScaleStrafe;
             if (Math.abs(gamepad1.left_stick_x) == 0) {
                 lastTimeStrafe = runtime.milliseconds();
             }
-            timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/cfg.timeToMaxScale;
-            timeScaleStrafe = Range.clip(timeScaleStrafe,0,1);
+            timeScaleStrafe = (runtime.milliseconds() - lastTimeStrafe) / cfg.timeToMaxScale;
+            timeScaleStrafe = Range.clip(timeScaleStrafe, 0, 1);
 
             double drive = Range.clip(-gamepad1.left_stick_y * cfg.scaleDrive, -cfg.maxDrive, cfg.maxDrive) * timeScaleDrive;
             double timeScaleTurn = 1;
@@ -63,20 +63,22 @@ public class Simon extends LinearOpMode {
 
             if (percentageDriveStrafe > cfg.minLStickOverridePerc) {
                 strafe = 0;
-                telemetry.addData("Debug","Drive over Strafe active");
+                telemetry.addData("Debug", "Drive over Strafe active");
             } else if (percentageStrafeDrive > cfg.minLStickOverridePerc) {
                 drive = 0;
-                telemetry.addData("Debug","Strafe over Drive active");
+                telemetry.addData("Debug", "Strafe over Drive active");
             }
 
             if (gamepad1.a) { // Toggle Bucket flip state
                 if (!armServo.getDebounce()) armServo.setState(!armServo.getState());
                 armServo.setDebounce(true);
-                armServo.setPosition(0.5*boolToNumber(armServo.getState()));
+                armServo.setPosition(0.5 * boolToNumber(armServo.getState()));
             }
-            if (!gamepad1.a) {armServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.a) {
+                armServo.setDebounce(false);
+            } // Reset when let go
 
-            mbs.setPower(drive,turn,strafe);
+            mbs.setPower(drive, turn, strafe);
 
             if (cfg.controllerAxesDebug) {
                 telemetry.addData("Left Stick", "X: " + gamepad1.left_stick_x);
@@ -97,7 +99,7 @@ public class Simon extends LinearOpMode {
                 telemetry.addData("strafe", timeScaleStrafe);
             }
 
-            if (cfg.runtimeDebug) telemetry.addData("Status","Run Time: " + runtime);
+            if (cfg.runtimeDebug) telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.update();
         }
     }

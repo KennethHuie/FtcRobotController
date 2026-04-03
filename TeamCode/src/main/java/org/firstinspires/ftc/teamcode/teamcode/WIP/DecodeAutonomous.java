@@ -1,14 +1,10 @@
 package org.firstinspires.ftc.teamcode.teamcode.WIP;
 
-import android.annotation.SuppressLint;
-
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.InstantFunction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -19,7 +15,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
-import org.firstinspires.ftc.teamcode.teamcode.ToggleServo;
+import org.firstinspires.ftc.teamcode.teamcode.Components.ToggleServo;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Turret;
+
 class Sweeper {
     DcMotor sweeper;
 
@@ -49,42 +47,6 @@ class Sweeper {
 
     public Action stop() {
         return new Stop();
-    }
-}
-
-class Turret {
-    int tolerance = 15;
-    DcMotor turret;
-
-    public Turret(HardwareMap hardwareMap) {
-        turret = hardwareMap.get(DcMotor.class, "turret");
-        turret.setTargetPosition(turret.getCurrentPosition()); // Keep current encoder position
-        turret.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    class TurnToAngle implements Action {
-        int angle;
-
-        public TurnToAngle(double a) {
-            angle = (int) Math.round((50d / 3) * a);
-        }
-
-        @Override
-        public boolean run(@NonNull TelemetryPacket telemetryPacket) {
-            telemetryPacket.put("target", angle);
-            turret.setTargetPosition(angle);
-            int current = turret.getCurrentPosition();
-            telemetryPacket.put("current", current);
-            return ((angle - 15) < current) && (angle < (angle + 15));
-        }
-    }
-
-    public Action turnTo(double a) {
-        return new TurnToAngle(a);
-    }
-
-    public void setTolerance(int x) {
-        tolerance = x;
     }
 }
 
@@ -141,13 +103,13 @@ public class DecodeAutonomous extends LinearOpMode {
                         .strafeToLinearHeading(new Vector2d(0, 0), Math.toRadians(90)) // MOVE to standard shooting area
                         .stopAndAdd(turret.turnTo(45))
                         .waitSeconds(5) // SHOOT preloaded
-                        .stopAndAdd(new CollectStack(new Vector2d(-12, 30), new Vector2d(-18, 24),15))
+                        .stopAndAdd(new CollectStack(new Vector2d(-12, 30), new Vector2d(-18, 24), 15))
                         .stopAndAdd(turret.turnTo(45))
                         .waitSeconds(5) // SHOOT 1st stack
-                        .stopAndAdd(new CollectStack(new Vector2d(12, 30), new Vector2d(-18, 24),15))
+                        .stopAndAdd(new CollectStack(new Vector2d(12, 30), new Vector2d(-18, 24), 15))
                         .stopAndAdd(turret.turnTo(45))
                         .waitSeconds(5) // SHOOT 2nd stack
-                        .stopAndAdd(new CollectStack(new Vector2d(34, 30), new Vector2d(-18, 24),15))
+                        .stopAndAdd(new CollectStack(new Vector2d(34, 30), new Vector2d(-18, 24), 15))
                         .stopAndAdd(turret.turnTo(45))
                         .waitSeconds(5) // SHOOT 3rd stack
                         .build());

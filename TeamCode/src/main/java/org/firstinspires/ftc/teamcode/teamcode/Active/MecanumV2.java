@@ -4,15 +4,15 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.teamcode.Configuration;
-import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
-import org.firstinspires.ftc.teamcode.teamcode.ToggleServo;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Configuration;
+import org.firstinspires.ftc.teamcode.teamcode.Components.MecanumBase;
+import org.firstinspires.ftc.teamcode.teamcode.Components.ToggleServo;
 
 // Flag FTC-Dashboard
 @Config
@@ -56,7 +56,7 @@ public class MecanumV2 extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Play hello moto
-        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("bomb", "raw", hardwareMap.appContext.getPackageName()));
+        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, hardwareMap.appContext.getResources().getIdentifier("bomb", "raw", hardwareMap.appContext.getPackageName()));
         //SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,hardwareMap.appContext.getResources().getIdentifier("moto", "raw", hardwareMap.appContext.getPackageName()));
         int forwardModeID = hardwareMap.appContext.getResources().getIdentifier("forwardmode", "raw", hardwareMap.appContext.getPackageName());
         int reverseModeID = hardwareMap.appContext.getResources().getIdentifier("reversemode", "raw", hardwareMap.appContext.getPackageName());
@@ -65,19 +65,19 @@ public class MecanumV2 extends LinearOpMode {
         //Create a new base drivetrain3
         boolean reverse = false; // Reverse drive mode
         boolean _reverse = false;// Debounce
-        MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
+        MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
 
         // Find motor instances on initialization
-        DcMotor vsLeftMotor = hardwareMap.get(DcMotor.class,"vsLeftMotor");
-        DcMotor vsRightMotor = hardwareMap.get(DcMotor.class,"vsRightMotor");
-        DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
+        DcMotor vsLeftMotor = hardwareMap.get(DcMotor.class, "vsLeftMotor");
+        DcMotor vsRightMotor = hardwareMap.get(DcMotor.class, "vsRightMotor");
+        DcMotor hsMotor = hardwareMap.get(DcMotor.class, "hsMotor");
 
         // Define servos
         ToggleServo bucketServo = new ToggleServo(hardwareMap.get(Servo.class, "bucket"));
         ToggleServo wristServoRight = new ToggleServo(hardwareMap.get(Servo.class, "bucketWristRight"));
         ToggleServo wristServoLeft = new ToggleServo(hardwareMap.get(Servo.class, "bucketWristLeft"));
         ToggleServo grabberServo = new ToggleServo(hardwareMap.get(Servo.class, "grabber"));
-        CRServo sweeper = hardwareMap.get(CRServo.class,"sweeper");
+        CRServo sweeper = hardwareMap.get(CRServo.class, "sweeper");
 
         // Set direction of motors
         vsRightMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -101,8 +101,8 @@ public class MecanumV2 extends LinearOpMode {
             double timeScaleDrive;
             if (Math.abs(gamepad1.left_stick_y) == 0) lastTimeDrive = runtime.milliseconds();
 
-            timeScaleDrive = (runtime.milliseconds()-lastTimeDrive)/cfg.timeToMaxScale;
-            timeScaleDrive = Range.clip(timeScaleDrive,0,1);
+            timeScaleDrive = (runtime.milliseconds() - lastTimeDrive) / cfg.timeToMaxScale;
+            timeScaleDrive = Range.clip(timeScaleDrive, 0, 1);
 
             //Turn time scaling
             double timeScaleTurn = 1;
@@ -114,8 +114,8 @@ public class MecanumV2 extends LinearOpMode {
             }
 
             //Turn runtime (ms) into percentage of goal time
-            timeScaleStrafe = (runtime.milliseconds()-lastTimeStrafe)/cfg.timeToMaxScale;
-            timeScaleStrafe = Range.clip(timeScaleStrafe,0,1);
+            timeScaleStrafe = (runtime.milliseconds() - lastTimeStrafe) / cfg.timeToMaxScale;
+            timeScaleStrafe = Range.clip(timeScaleStrafe, 0, 1);
 
             //Movement variables, all clamped
             double drive = Range.clip(-gamepad1.left_stick_y * cfg.scaleDrive, -cfg.maxDrive, cfg.maxDrive) * timeScaleDrive;
@@ -128,10 +128,10 @@ public class MecanumV2 extends LinearOpMode {
             //Round inputs if over a certain threshold, helps with maintaining straight lines
             if (percentageDriveStrafe > cfg.minLStickOverridePerc) {
                 strafe = 0;
-                telemetry.addData("Debug","Drive over Strafe active");
+                telemetry.addData("Debug", "Drive over Strafe active");
             } else if (percentageStrafeDrive > cfg.minLStickOverridePerc) {
                 drive = 0;
-                telemetry.addData("Debug","Strafe over Drive active");
+                telemetry.addData("Debug", "Strafe over Drive active");
             }
             if (gamepad1.y) {
                 if (!_reverse) {
@@ -139,9 +139,9 @@ public class MecanumV2 extends LinearOpMode {
                     reverse = !reverse;
                     SoundPlayer.getInstance().stopPlayingAll();
                     if (reverse) {
-                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,reverseModeID);
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, reverseModeID);
                     } else {
-                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,forwardModeID);
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, forwardModeID);
                     }
                 }
             }
@@ -156,7 +156,7 @@ public class MecanumV2 extends LinearOpMode {
             }
 
             //Send control values to the basic Mecanum Drivetrain
-            mbs.setPower(drive,turn,strafe);
+            mbs.setPower(drive, turn, strafe);
 
             /* todo:
              - Create fixed height points that the sides automatically change between
@@ -166,12 +166,12 @@ public class MecanumV2 extends LinearOpMode {
             //Determines the power for the vertical lift slide motors
             heightLimit = vsLeftMotor.getCurrentPosition() <= maxHeight;
             //double verticalSlidePower = (boolToNumber((gamepad1.left_bumper))-boolToNumber(gamepad1.right_bumper&&!heightLimit));
-            double a = boolToNumber(vsLeftMotor.getCurrentPosition() < (test[step]-150)); // Lower
-            double b = boolToNumber(vsLeftMotor.getCurrentPosition() > (test[step]+150)); // Higher
-            double verticalSlidePower = (a-b);
+            double a = boolToNumber(vsLeftMotor.getCurrentPosition() < (test[step] - 150)); // Lower
+            double b = boolToNumber(vsLeftMotor.getCurrentPosition() > (test[step] + 150)); // Higher
+            double verticalSlidePower = (a - b);
             if (gamepad1.right_bumper) {
                 if (!dbr) {
-                    if (step < test.length-1) {
+                    if (step < test.length - 1) {
                         step += 1;
                     }
                 }
@@ -204,7 +204,7 @@ public class MecanumV2 extends LinearOpMode {
             */
             //Determines the power for the Intake slider motor
             lengthLimit = hsMotor.getCurrentPosition() >= maxLength;
-            double horizontalSlidePower=0;
+            double horizontalSlidePower = 0;
             if (!lengthLimit) {
                 horizontalSlidePower = -(gamepad1.left_trigger - gamepad1.right_trigger);
             } else {
@@ -217,10 +217,13 @@ public class MecanumV2 extends LinearOpMode {
                 bucketServo.setPosition(boolToNumber(bucketServo.getState()));
                 bucketServo.setPosition(boolToNumber(bucketServo.getState()));
             }
-            if (!gamepad1.a) {bucketServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.a) {
+                bucketServo.setDebounce(false);
+            } // Reset when let go
 
             if (gamepad1.x) { // Toggle Intake flip state
-                if (!wristServoRight.getDebounce()) wristServoRight.setState(!wristServoRight.getState());
+                if (!wristServoRight.getDebounce())
+                    wristServoRight.setState(!wristServoRight.getState());
                 wristServoRight.setDebounce(true);
 
                 if (wristServoRight.getState() && bucketServo.getState()) {
@@ -230,26 +233,30 @@ public class MecanumV2 extends LinearOpMode {
                     bucketServo.setPosition(1);
                 }
 
-                wristServoRight.setPosition(boolToNumber(wristServoRight.getState())*bucketWristRange);
-                wristServoLeft.setPosition(1-boolToNumber(wristServoRight.getState())*bucketWristRange);
+                wristServoRight.setPosition(boolToNumber(wristServoRight.getState()) * bucketWristRange);
+                wristServoLeft.setPosition(1 - boolToNumber(wristServoRight.getState()) * bucketWristRange);
             }
-            if (!gamepad1.x) {wristServoRight.setDebounce(false);} // Reset when let go
+            if (!gamepad1.x) {
+                wristServoRight.setDebounce(false);
+            } // Reset when let go
 
             if (gamepad1.b) { // Toggle Grabber state
                 if (!grabberServo.getDebounce()) {
                     grabberServo.setState(!grabberServo.getState());
                     SoundPlayer.getInstance().stopPlayingAll();
                     if (grabberServo.getState()) {
-                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,grabberOpenID);
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, grabberOpenID);
                     } else {
-                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext,grabberClosedID);
+                        SoundPlayer.getInstance().startPlaying(hardwareMap.appContext, grabberClosedID);
 
                     }
                 }
                 grabberServo.setDebounce(true);
-                grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
+                grabberServo.setPosition(boolToNumber(grabberServo.getState()) * grabberRange);
             }
-            if (!gamepad1.b) {grabberServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.b) {
+                grabberServo.setDebounce(false);
+            } // Reset when let go
 
             // Sweeper logic
             if (gamepad1.dpad_up) {
@@ -265,20 +272,20 @@ public class MecanumV2 extends LinearOpMode {
             vsRightMotor.setPower(verticalSlidePower);
             // Some kind of attempt to equalize the slide positions - Kenneth, 4/24/2025
             if (verticalSlidePower == 0) {
-                double balancing = (double)(vsLeftMotor.getCurrentPosition()-vsRightMotor.getCurrentPosition())/150;
+                double balancing = (double) (vsLeftMotor.getCurrentPosition() - vsRightMotor.getCurrentPosition()) / 150;
                 vsRightMotor.setPower(balancing);
                 vsLeftMotor.setPower(-balancing);
             }
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
-            telemetry.addData("A",a);
-            telemetry.addData("B",b);
-            telemetry.addData("S",step);
-            telemetry.addData("V:",a-b);
+            telemetry.addData("A", a);
+            telemetry.addData("B", b);
+            telemetry.addData("S", step);
+            telemetry.addData("V:", a - b);
 
             //Reverse Mode:
-            if (!reverse) telemetry.addData("FORWARD","MODE");
-            if (reverse) telemetry.addData("REVERSE","MODE");
+            if (!reverse) telemetry.addData("FORWARD", "MODE");
+            if (reverse) telemetry.addData("REVERSE", "MODE");
 
             // Fast Flags
             if (cfg.controllerAxesDebug) {
@@ -302,10 +309,10 @@ public class MecanumV2 extends LinearOpMode {
                 telemetry.addData("horizontal", horizontalSlidePower);
             }
             if (cfg.sliderEncoderDebug) {
-                telemetry.addData("LeftSlide",vsLeftMotor.getCurrentPosition());
-                telemetry.addData("RightSlide",vsRightMotor.getCurrentPosition());
+                telemetry.addData("LeftSlide", vsLeftMotor.getCurrentPosition());
+                telemetry.addData("RightSlide", vsRightMotor.getCurrentPosition());
             }
-            if (cfg.runtimeDebug) telemetry.addData("Status","Run Time: " + runtime);
+            if (cfg.runtimeDebug) telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.update();
         }
     }

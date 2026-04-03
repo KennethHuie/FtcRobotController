@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teamcode;
+package org.firstinspires.ftc.teamcode.teamcode.Components;
 
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ServoController;
@@ -7,6 +7,7 @@ public class ToggleServo implements Servo {
     private final Servo fservo;
     private boolean state;
     private boolean debounce;
+
     public ToggleServo(Servo servo) {
         this.fservo = servo;
         this.state = false;
@@ -50,16 +51,18 @@ public class ToggleServo implements Servo {
     }
 
     @Override
-    public void setPosition (double position) {
+    public void setPosition(double position) {
         fservo.setPosition(position);
     }
+
     @Override
-    public double getPosition () {
+    public double getPosition() {
         return fservo.getPosition();
     }
+
     @Override
     public void scaleRange(double min, double max) {
-        fservo.scaleRange(min,max);
+        fservo.scaleRange(min, max);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.teamcode;
+package org.firstinspires.ftc.teamcode.teamcode.Components;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -14,7 +14,7 @@ public class MecanumBase {
     Configuration cfg;
     Telemetry telemetry;
 
-    public MecanumBase(HardwareMap hardwareMap, Configuration c,Telemetry t) {
+    public MecanumBase(HardwareMap hardwareMap, Configuration c, Telemetry t) {
         FL_Motor = hardwareMap.get(DcMotor.class, "FL_Motor");
         RL_Motor = hardwareMap.get(DcMotor.class, "RL_Motor");
         FR_Motor = hardwareMap.get(DcMotor.class, "FR_Motor");
@@ -43,16 +43,16 @@ public class MecanumBase {
         RR_Motor.setPower(RR_Power);
 
         if (cfg.motorPowerDebug) {
-            telemetry.addData("FL Power",FL_Power);
-            telemetry.addData("RL Power",RL_Power);
-            telemetry.addData("FR Power",FR_Power);
-            telemetry.addData("RR Power",RR_Power);
+            telemetry.addData("FL Power", FL_Power);
+            telemetry.addData("RL Power", RL_Power);
+            telemetry.addData("FR Power", FR_Power);
+            telemetry.addData("RR Power", RR_Power);
         }
         if (cfg.motorDirectionDebug) {
-            telemetry.addData("FL Power",FL_Motor.getDirection());
-            telemetry.addData("RL Power",RL_Motor.getDirection());
-            telemetry.addData("FR Power",FR_Motor.getDirection());
-            telemetry.addData("RR Power",RR_Motor.getDirection());
+            telemetry.addData("FL Power", FL_Motor.getDirection());
+            telemetry.addData("RL Power", RL_Motor.getDirection());
+            telemetry.addData("FR Power", FR_Motor.getDirection());
+            telemetry.addData("RR Power", RR_Motor.getDirection());
         }
     }
 }

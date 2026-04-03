@@ -1,18 +1,15 @@
 package org.firstinspires.ftc.teamcode.teamcode.Utilities;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.teamcode.teamcode.Configuration;
-import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
-import org.firstinspires.ftc.teamcode.teamcode.ToggleServo;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Configuration;
+import org.firstinspires.ftc.teamcode.teamcode.Components.ToggleServo;
 
 // Flag FTC-Dashboard
 @Config
@@ -36,15 +33,15 @@ public class DemoMode extends LinearOpMode {
     @Override
     public void runOpMode() {
         // Find motor instances on initialization
-        DcMotor vsLeftMotor = hardwareMap.get(DcMotor.class,"vsLeftMotor");
-        DcMotor vsRightMotor = hardwareMap.get(DcMotor.class,"vsRightMotor");
-        DcMotor hsMotor = hardwareMap.get(DcMotor.class,"hsMotor");
+        DcMotor vsLeftMotor = hardwareMap.get(DcMotor.class, "vsLeftMotor");
+        DcMotor vsRightMotor = hardwareMap.get(DcMotor.class, "vsRightMotor");
+        DcMotor hsMotor = hardwareMap.get(DcMotor.class, "hsMotor");
 
         // Define servos
         ToggleServo bucketServo = new ToggleServo(hardwareMap.get(Servo.class, "bucket"));
         ToggleServo wristServo = new ToggleServo(hardwareMap.get(Servo.class, "bucketWrist"));
         ToggleServo grabberServo = new ToggleServo(hardwareMap.get(Servo.class, "grabber"));
-        CRServo sweeper = hardwareMap.get(CRServo.class,"sweeper");
+        CRServo sweeper = hardwareMap.get(CRServo.class, "sweeper");
 
         // Set direction of motors
         vsRightMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -55,16 +52,18 @@ public class DemoMode extends LinearOpMode {
         runtime.reset();
         while (opModeIsActive()) {
             //Determines the power for the vertical lift slide motors
-            double verticalSlidePower = (boolToNumber(gamepad1.left_bumper)-boolToNumber(gamepad1.right_bumper));
+            double verticalSlidePower = (boolToNumber(gamepad1.left_bumper) - boolToNumber(gamepad1.right_bumper));
             //Determines the power for the Intake slider motor
-            double horizontalSlidePower = -(gamepad1.left_trigger-gamepad1.right_trigger);
+            double horizontalSlidePower = -(gamepad1.left_trigger - gamepad1.right_trigger);
 
             if (gamepad1.a) { // Toggle Bucket flip state
                 if (!bucketServo.getDebounce()) bucketServo.setState(!bucketServo.getState());
                 bucketServo.setDebounce(true);
                 bucketServo.setPosition(boolToNumber(bucketServo.getState()));
             }
-            if (!gamepad1.a) {bucketServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.a) {
+                bucketServo.setDebounce(false);
+            } // Reset when let go
 
             if (gamepad1.x) { // Toggle Intake flip state
                 if (!wristServo.getDebounce()) wristServo.setState(!wristServo.getState());
@@ -77,18 +76,22 @@ public class DemoMode extends LinearOpMode {
                     bucketServo.setPosition(1);
                 }
 
-                wristServo.setPosition(boolToNumber(wristServo.getState())*bucketWristRange);
+                wristServo.setPosition(boolToNumber(wristServo.getState()) * bucketWristRange);
             }
-            if (!gamepad1.x) {wristServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.x) {
+                wristServo.setDebounce(false);
+            } // Reset when let go
 
             if (gamepad1.b) { // Toggle Grabber state
                 if (!grabberServo.getDebounce()) {
                     grabberServo.setState(!grabberServo.getState());
                 }
                 grabberServo.setDebounce(true);
-                grabberServo.setPosition(boolToNumber(grabberServo.getState())*grabberRange);
+                grabberServo.setPosition(boolToNumber(grabberServo.getState()) * grabberRange);
             }
-            if (!gamepad1.b) {grabberServo.setDebounce(false);} // Reset when let go
+            if (!gamepad1.b) {
+                grabberServo.setDebounce(false);
+            } // Reset when let go
 
             // Sweeper logic
             if (gamepad1.dpad_up) {
@@ -104,7 +107,7 @@ public class DemoMode extends LinearOpMode {
             vsRightMotor.setPower(verticalSlidePower);
             hsMotor.setPower(horizontalSlidePower);
             // Set servo power
-            telemetry.addData("Strafe",cfg.scaleStrafe);
+            telemetry.addData("Strafe", cfg.scaleStrafe);
 
             // Fast Flags
             if (cfg.controllerAxesDebug) {
@@ -118,10 +121,10 @@ public class DemoMode extends LinearOpMode {
                 telemetry.addData("horizontal", horizontalSlidePower);
             }
             if (cfg.sliderEncoderDebug) {
-                telemetry.addData("LeftSlide",vsLeftMotor.getCurrentPosition());
-                telemetry.addData("RightSlide",vsRightMotor.getCurrentPosition());
+                telemetry.addData("LeftSlide", vsLeftMotor.getCurrentPosition());
+                telemetry.addData("RightSlide", vsRightMotor.getCurrentPosition());
             }
-            if (cfg.runtimeDebug) telemetry.addData("Status","Run Time: " + runtime);
+            if (cfg.runtimeDebug) telemetry.addData("Status", "Run Time: " + runtime);
             telemetry.update();
         }
     }

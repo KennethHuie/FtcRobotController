@@ -4,8 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.teamcode.Configuration;
-import org.firstinspires.ftc.teamcode.teamcode.MecanumBase;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Configuration;
+import org.firstinspires.ftc.teamcode.teamcode.Components.MecanumBase;
 
 @Autonomous(name = "TeslaFSD (AndroidStudio)", group = "Prototype")
 public class TeslaFSD extends LinearOpMode {
@@ -15,7 +15,7 @@ public class TeslaFSD extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        MecanumBase mbs = new MecanumBase(hardwareMap,cfg,telemetry);
+        MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
 
         waitForStart();
         runtime.reset();
@@ -26,7 +26,7 @@ public class TeslaFSD extends LinearOpMode {
             if (runtime.milliseconds() > 3000) { // Stop after 1 second
                 mbs.setPower(0, 0, 0);
             }
-            telemetry.addData("Runtime",runtime.milliseconds());
+            telemetry.addData("Runtime", runtime.milliseconds());
             telemetry.update();
         }
     }
