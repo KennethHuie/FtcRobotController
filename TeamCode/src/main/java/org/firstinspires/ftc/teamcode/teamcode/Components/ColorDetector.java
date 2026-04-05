@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.teamcode.Components;
 
+import androidx.annotation.NonNull;
+
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 public class ColorDetector {
-    NormalizedColorSensor sensor;
+    @NonNull
+    final NormalizedColorSensor sensor;
 
-    public ColorDetector(NormalizedColorSensor Sensor) {
+    public ColorDetector(@NonNull NormalizedColorSensor Sensor) {
         sensor = Sensor;
     }
 
