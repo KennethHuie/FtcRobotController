@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.teamcode.Components.ColorDetector;
 import org.firstinspires.ftc.teamcode.teamcode.Components.Sweeper;
 
@@ -39,7 +38,7 @@ public class SensorDetect extends LinearOpMode {
             ColorDetector Rear = new ColorDetector(rearColorSensor);
             pt.addData("BC", sweeper.BallCount);
             pt.addData("FC", sweeper.FireCount);
-            pt.addData("Front Sensor", leftDistanceSensor.getDistance(DistanceUnit.CM) < 20 ? "Detected" : "No Ball");
+            pt.addData("Front Sensor", sweeper.ballDetected() ? "Detected" : "No Ball");
             pt.addData("Roof", Roof.isGreen() ? "Detecting Green" : Roof.isPurple() ? "Detecting Purple" : "Unsure / None");
             pt.addData("Rear", Rear.isGreen() ? "Detecting Green" : Rear.isPurple() ? "Detecting Purple" : "Unsure / None");
             pt.addLine("");

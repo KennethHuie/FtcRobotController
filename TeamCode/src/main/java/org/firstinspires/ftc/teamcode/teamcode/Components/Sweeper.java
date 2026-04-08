@@ -63,7 +63,7 @@ public class Sweeper {
         @Override
         public boolean run(@NonNull TelemetryPacket telemetryPacket) {
             PollCount += 1;
-            if (leftDistanceSensor.getDistance(DistanceUnit.CM) < 20) {
+            if (ballDetected()) {
                 incoming = true;
             }
             if (incoming && roofColorSensor.isSensing() && BallCount < 2) {
@@ -94,5 +94,9 @@ public class Sweeper {
 
     public Action stopTrack() {
         return new StopTrack();
+    }
+
+    public boolean ballDetected() {
+        return leftDistanceSensor.getDistance(DistanceUnit.CM) < 20; // Change this threshold if necessary
     }
 }
