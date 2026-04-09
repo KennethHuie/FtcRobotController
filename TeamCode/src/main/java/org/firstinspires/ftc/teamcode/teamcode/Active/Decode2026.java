@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.teamcode.Components.Configuration;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Flywheel;
 import org.firstinspires.ftc.teamcode.teamcode.Components.MecanumBase;
 import org.firstinspires.ftc.teamcode.teamcode.Components.ToggleServo;
 import org.firstinspires.ftc.teamcode.teamcode.Components.Turret;
@@ -70,8 +71,8 @@ public class Decode2026 extends LinearOpMode {
 
         Turret turret = new Turret(hardwareMap);
         //Motors
-        DcMotor flywheel1 = hardwareMap.get(DcMotor.class, "flywheel1");
-        DcMotor flywheel2 = hardwareMap.get(DcMotor.class, "flywheel2");
+        final Flywheel flywheels = new Flywheel(hardwareMap, runtime);
+        flywheels.flywheel2.setDirection(DcMotor.Direction.REVERSE);
         DcMotor sweeper = hardwareMap.get(DcMotor.class, "sweeper");
         //Servo
         ToggleServo standLeft = new ToggleServo(hardwareMap.get(Servo.class, "servoL"));
@@ -96,14 +97,7 @@ public class Decode2026 extends LinearOpMode {
         NormalizedRGBA rearColor = rearColorSensor.getNormalizedColors();
 
         turret.motor.setDirection(DcMotor.Direction.REVERSE);
-        flywheel2.setDirection(DcMotor.Direction.REVERSE);
         hoodLeft.setDirection(Servo.Direction.REVERSE);
-
-        flywheel1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flywheel1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        flywheel2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        flywheel2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        //turret.motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turret.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
@@ -184,10 +178,10 @@ public class Decode2026 extends LinearOpMode {
             turret.setTargetVelocity(rightPower - leftPower);
 
             // Flywheel
-            int delta1 = flywheel1.getCurrentPosition() - lastFly1;
-            int delta2 = flywheel2.getCurrentPosition() - lastFly2;
-            lastFly1 = flywheel1.getCurrentPosition();
-            lastFly2 = flywheel2.getCurrentPosition();
+            int delta1 = flywheels.flywheel1.getCurrentPosition() - lastFly1;
+            int delta2 = flywheels.flywheel2.getCurrentPosition() - lastFly2;
+            lastFly1 = flywheels.flywheel1.getCurrentPosition();
+            lastFly2 = flywheels.flywheel2.getCurrentPosition();
 
             // Rumble when target speed achieved
             if (Math.abs(delta1) > flywheelSpeed && Math.abs(delta2) > flywheelSpeed) {
@@ -195,12 +189,10 @@ public class Decode2026 extends LinearOpMode {
                     readyPlayed = true;
                     Gamepad1.rumble(500);
                 }
-                flywheel1.setPower(Gamepad1.a ? 0.35 : 0.3);
-                flywheel2.setPower(Gamepad1.a ? 0.35 : 0.3);
+                flywheels.setPower(Gamepad1.a ? 0.35 : 0.3);
             } else {
                 double power = ((flywheelSpeed - (Math.abs((double) delta1) + Math.abs((double) delta2)) / 2) / 10) + 0.3;
-                flywheel1.setPower(Gamepad1.a ? power : 0.3);
-                flywheel2.setPower(Gamepad1.a ? power : 0.3);
+                flywheels.setPower(Gamepad1.a ? power : 0.3);
                 readyPlayed = false;
             }
 
@@ -237,8 +229,8 @@ public class Decode2026 extends LinearOpMode {
             telemetry.addData("hood", hoodLeft.getPosition());
             telemetry.addLine();
             telemetry.addData("target", flywheelSpeed);
-            telemetry.addData("flywheel1", flywheel1.getPower());
-            telemetry.addData("flywheel2", flywheel2.getPower());
+            telemetry.addData("flywheel1", flywheels.flywheel1.getPower());
+            telemetry.addData("flywheel2", flywheels.flywheel2.getPower());
             telemetry.addLine();
             telemetry.addData("delta1", delta1);
             telemetry.addData("delta2", delta2);

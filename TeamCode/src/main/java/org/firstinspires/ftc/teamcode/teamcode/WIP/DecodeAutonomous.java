@@ -13,13 +13,17 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Flywheel;
 import org.firstinspires.ftc.teamcode.teamcode.Components.Sweeper;
 import org.firstinspires.ftc.teamcode.teamcode.Components.Turret;
 
 @Autonomous(name = "DecodeAutonomous", preselectTeleOp = "Decode2026")
 public class DecodeAutonomous extends LinearOpMode {
+    private final ElapsedTime runtime = new ElapsedTime();
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -30,8 +34,8 @@ public class DecodeAutonomous extends LinearOpMode {
 
         Limelight3A camera = hardwareMap.get(Limelight3A.class, "turretCam");
         //Motors
-        DcMotor flywheel1 = hardwareMap.get(DcMotor.class, "flywheel1");
-        DcMotor flywheel2 = hardwareMap.get(DcMotor.class, "flywheel2");
+        final Flywheel flywheels = new Flywheel(hardwareMap, runtime);
+        flywheels.flywheel2.setDirection(DcMotor.Direction.REVERSE);
         Sweeper sweeper = new Sweeper(hardwareMap);
         Turret turret = new Turret(hardwareMap);
         //Servo

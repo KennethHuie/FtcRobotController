@@ -5,63 +5,62 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "StagecraftDoohickey (AndroidStudio)", group = "Utilities")
+@TeleOp(name = "StagecraftDoohickey", group = "Utilities")
 public class StagecraftDoohickey extends LinearOpMode {
     private final ElapsedTime runtime = new ElapsedTime(); //Time since startup
     //private final double lastElapsed = runtime.milliseconds();
 
     @Override
     public void runOpMode() {
-        DcMotor Slider = hardwareMap.get(DcMotor.class,"slider");
-
         boolean toggle = false;
-        boolean debounce = false;
+        boolean _toggle = false;
+        boolean MANUALOVERRIDE = true;
 
-        boolean cycle = false; // false = bottom, true = top
-        boolean switchCycle = true;
-        double nextTime = runtime.milliseconds() + 15000;
-        final double maxlimit = 10000;
-
-        Slider.setDirection(DcMotor.Direction.FORWARD);
-
-        Slider.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Slider.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        DcMotor FlyWheel1 = hardwareMap.get(DcMotor.class, "fly1");
+        FlyWheel1.setDirection(DcMotor.Direction.FORWARD);
+        FlyWheel1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FlyWheel1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
         runtime.reset();
         while (opModeIsActive()) {
+            if (Math.abs(gamepad1.left_stick_y) > 0) {
+                MANUALOVERRIDE = true;
+            }
             if (gamepad1.a) {
-                if (!debounce) {
-                    debounce = true;
-                    toggle = !toggle;
+                MANUALOVERRIDE = false;
+            }
+
+            if (gamepad1.a && !_toggle) {
+                _toggle = true;
+                toggle = !toggle;
+            }
+            if (!gamepad1.a) {
+                _toggle = false;
+            }
+
+            double openPosition = 10000;
+            if (!MANUALOVERRIDE) {
+                if (toggle) {
+                    // OPEN POSITION
+                    double div = (openPosition - FlyWheel1.getCurrentPosition()) / 1000;
+                    double rounded = Math.round(div);
+                    FlyWheel1.setPower(Math.min(rounded * 1000, 0.5));
+                } else {
+                    // CLOSED POSITION
+                    double div = (double) -FlyWheel1.getCurrentPosition() / 1000;
+                    double rounded = Math.round(div);
+                    FlyWheel1.setPower(Math.max(rounded * 1000, -0.358));
                 }
             } else {
-                debounce = false;
+                FlyWheel1.setPower(gamepad1.left_stick_y / 2);
             }
 
-            if (toggle) {
-                if (switchCycle) {
-                    cycle = !cycle;
-                    switchCycle = false;
-                    nextTime = runtime.milliseconds() + 15000;
-                }
-            }
-
-            if (runtime.milliseconds() - nextTime > 0) {
-                switchCycle = true;
-            }
-
-            double current = Slider.getCurrentPosition();
-            double power = cycle ? maxlimit-current : 100 - current;
-            Slider.setPower(power*-Math.abs(power)/10);
-
-            Slider.setPower(gamepad1.left_stick_y);
-
-            telemetry.addData("Diff", (runtime.milliseconds()-nextTime)/1000);
-            telemetry.addData("Cycle", cycle);
-            telemetry.addData("Set to", current);
+            telemetry.addData("Fly1", FlyWheel1.getPower());
+            telemetry.addData("Encoder", FlyWheel1.getCurrentPosition());
             telemetry.addData("Toggle", toggle);
-            telemetry.addData("Encoder", current);
+            telemetry.addData("MANUAL OVERRIDE", MANUALOVERRIDE);
+            telemetry.addData("Reminder ⚠", "Up = CLOSE, Down = OPEN");
             telemetry.update();
         }
     }
