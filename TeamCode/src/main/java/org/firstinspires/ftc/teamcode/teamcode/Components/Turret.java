@@ -13,13 +13,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.util.List;
 
 public class Turret {
-    private final double TICKS_TO_DEGREES = 0.06; // 0.06 IS FOR A TETRIX TORQUENADO MOTOR AND 1:0.24 RATIO
+    private final double TICKS_TO_DEGREES = 0.05; // 0.06 IS FOR A TETRIX TORQUENADO MOTOR AND 1:0.24 RATIO
     //https://www.desmos.com/calculator/r7tltoapdl < use this to calculate encoder limits using angles
     // -1500 = 90°, 1000 = 60°
     int toleranceTicks = 50; // Acceptable +- to target
     double toleranceDegrees = toleranceTicks * TICKS_TO_DEGREES;
-    int leftBound = -1500; // Maximum left position in encoder ticks
-    int rightBound = 1000; // Maximum right position in encoder ticks
+    int leftBound = -1800; // Maximum left position in encoder ticks
+    int rightBound = 1200; // Maximum right position in encoder ticks
     int dropoff = 500; // Width of the dropoff range in encoder ticks
     int correctionReductionFactor = 15000; // Given in encoder ticks, higher = corrects less (currentPositionTicks/THIS = correctionPower)
     public final DcMotor motor;
@@ -33,11 +33,11 @@ public class Turret {
     }
 
     private double tickToDegrees(int ticks) {
-        return ticks * 0.06;
+        return ticks * TICKS_TO_DEGREES;
     }
 
     private int degreesToTicks(double degrees) {
-        return (int) Math.round(degrees / 0.06);
+        return (int) Math.round(degrees / TICKS_TO_DEGREES);
     }
 
     class TurnToAngle implements Action {
@@ -78,6 +78,12 @@ public class Turret {
         return new TrackTag(id);
     }
 
+    public void resetEncoder() {
+        DcMotor.RunMode s = motor.getMode();
+        motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motor.setMode(s);
+    }
+
     public void setTolerance(int ticks) {
         toleranceTicks = ticks;
         toleranceDegrees = ticks * TICKS_TO_DEGREES;
@@ -108,6 +114,7 @@ public class Turret {
 
     //https://www.desmos.com/calculator/80zwducpyr < Visualization of what this math does
     public void setTargetVelocity(double power) {
+        power = Math.min(Math.max(power, -1), 1);
         double currentAsDouble = motor.getCurrentPosition();
         double limiterCoeff = 1;
         double d = 0;
@@ -127,12 +134,14 @@ public class Turret {
         for (LLResultTypes.FiducialResult tag : trackedTags) {
             if (tag.getFiducialId() != id) continue;
             double degX = tag.getTargetXDegrees();
-            setTargetVelocity(degX / 20);
+            //double response = Math.copySign(Math.pow(degX / 5, 3),degX)
+            setTargetVelocity(degX/15);
             if (degX < toleranceDegrees && degX > -toleranceDegrees) {
                 return TrackStatus.Aligned;
             }
             return TrackStatus.Tracking;
         }
+        setTargetVelocity(0);
         return TrackStatus.Stopped;
     }
 }

@@ -168,14 +168,18 @@ public class Decode2026 extends LinearOpMode {
             double leftPower = 0;
             double rightPower = 0;
 
-            //Lock onto closest tag
-            if (Gamepad1.a) {
+            if (Gamepad1.left_trigger + Gamepad1.right_trigger != 0) { // Input override
+                leftPower = Gamepad1.left_trigger > 0 ? circleCurve(Gamepad1.left_trigger) : leftPower;
+                rightPower = Gamepad1.right_trigger > 0 ? circleCurve(Gamepad1.right_trigger) : rightPower;
+                turret.setTargetVelocity(rightPower - leftPower);
+            } else if (Gamepad1.a) { //Lock onto the closest tag
+                turret.trackTag(20); // blu
+                turret.trackTag(24); // reb
+            } else {
+                turret.setTargetVelocity(0); // Reset if neither condition is met
                 turret.trackTag(20); // blu
                 turret.trackTag(24); // reb
             }
-            leftPower = Gamepad1.left_trigger > 0 ? circleCurve(Gamepad1.left_trigger) : leftPower;
-            rightPower = Gamepad1.right_trigger > 0 ? circleCurve(Gamepad1.right_trigger) : rightPower;
-            turret.setTargetVelocity(rightPower - leftPower);
 
             // Flywheel
             int delta1 = flywheels.flywheel1.getCurrentPosition() - lastFly1;

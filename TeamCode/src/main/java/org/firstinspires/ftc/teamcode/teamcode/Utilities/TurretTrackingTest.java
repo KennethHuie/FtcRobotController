@@ -14,6 +14,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.teamcode.Components.TrackStatus;
+import org.firstinspires.ftc.teamcode.teamcode.Components.Turret;
 
 @Autonomous(name = "TurretTrackingTest", group = "Utilities")
 public class TurretTrackingTest extends LinearOpMode {
@@ -25,25 +27,14 @@ public class TurretTrackingTest extends LinearOpMode {
         Limelight3A camera = hardwareMap.get(Limelight3A.class, "turretCam");
         camera.start();
         waitForStart();
-        DcMotor turret = hardwareMap.get(DcMotor.class, "turret");
+        Turret turret = new Turret(hardwareMap);
         runtime.reset();
         while (opModeIsActive()) {
-            Gamepad Gamepad1 = gpm1.asCombinedFTCGamepad(gamepad1);
-            LLResult result = camera.getLatestResult();
-            if (result != null && result.isValid()) {
-                Pose3D botpose = result.getBotpose();
-                turret.setPower(-result.getTx() / 10);
-                if (turret.getCurrentPosition() > 1000) {
-                    turret.setPower(0);
-                }
-                if (turret.getCurrentPosition() < -1500) {
-                    turret.setPower(0);
-                }
-                telemetry.addData("X",result.getTx());
-                telemetry.update();
-            } else {
-                turret.setPower(0);
-            }
+            TrackStatus blue = turret.trackTag(20);
+            TrackStatus red = turret.trackTag(24);
+            telemetry.addData("status blue", blue.toString());
+            telemetry.addData("status red", red.toString());
+            telemetry.update();
         }
     }
 }
