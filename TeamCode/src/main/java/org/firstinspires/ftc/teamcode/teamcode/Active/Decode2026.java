@@ -62,7 +62,7 @@ public class Decode2026 extends LinearOpMode {
         boolean _reverse = false;// Debounce
         MecanumBase mbs = new MecanumBase(hardwareMap, cfg, telemetry);
 
-        double flywheelSpeed = 30;
+        double flywheelSpeed = 45;
 
         boolean readyPlayed = false; // Used to rumble controller when flywheel speed target hit
 
@@ -172,13 +172,10 @@ public class Decode2026 extends LinearOpMode {
                 leftPower = Gamepad1.left_trigger > 0 ? circleCurve(Gamepad1.left_trigger) : leftPower;
                 rightPower = Gamepad1.right_trigger > 0 ? circleCurve(Gamepad1.right_trigger) : rightPower;
                 turret.setTargetVelocity(rightPower - leftPower);
-            } else if (Gamepad1.a) { //Lock onto the closest tag
-                turret.trackTag(20); // blu
-                turret.trackTag(24); // reb
+                telemetry.addData("Tracking", "Manual Override");
             } else {
-                turret.setTargetVelocity(0); // Reset if neither condition is met
-                turret.trackTag(20); // blu
-                turret.trackTag(24); // reb
+                telemetry.addData("Tracking Red", turret.trackTag(20));
+                telemetry.addData("Tracking Blue", turret.trackTag(24));
             }
 
             // Flywheel
